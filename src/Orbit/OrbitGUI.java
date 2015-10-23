@@ -1,0 +1,41 @@
+package Orbit;
+
+import GameData.*;
+
+public interface OrbitGUI {
+	
+	void setPlayer(int playerNo, String name);
+	
+	String getPlayerName(int playerNo);
+	
+	String readPlayerName(int playerNo);
+	
+	void setField(int fieldNo, Field data);
+	
+	Field getField(int fieldNo);
+	
+	void SetDice(int left, int right);
+	
+	void SetDiceType(int sides);
+	
+	int getDieValue(boolean right);
+	
+	int getTotalDieValue();
+	
+	void movePlayer(int playerNo, int fieldNo);
+	
+	int getPlayerPosition(int playerNo);
+	
+	void setPlayerScore(int playerNo, int score);
+	
+	int getPlayerScore(int playerNo);
+	
+	void setScreenText(String text);
+	
+	void moveMouse(int x, int y, boolean clickAfterMove);
+	
+	int clickButton();
+	
+	void setButtonVisible(int buttonNo, boolean visible);
+	
+}
