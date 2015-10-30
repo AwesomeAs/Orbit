@@ -1,6 +1,7 @@
 package Orbit;
 
 import GameData.*;
+import Utils.AudioPlayer;
 
 public interface OrbitGUI {
 	
@@ -39,5 +40,7 @@ public interface OrbitGUI {
 	int clickButton();
 	
 	void setButtonVisible(int buttonNo, boolean visible);
+	
+	AudioPlayer getAudio(final String path);
 	
 }

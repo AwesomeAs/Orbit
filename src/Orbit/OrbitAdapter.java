@@ -10,10 +10,12 @@ import java.awt.RenderingHints;
 import java.awt.event.*;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import GameData.Field;
+import Utils.AudioPlayer;
 import Utils.EventListener;
 import Utils.FontManager;
 import Utils.MouseController;
@@ -25,6 +27,7 @@ public class OrbitAdapter implements OrbitGUI {
 	private OrbitTextField[] textfields = new OrbitTextField[12];
 	private OrbitDice[] dice = new OrbitDice[2];
 	private OrbitStatus[] counter = new OrbitStatus[12];
+	private ImageIcon background;
 	private int[] position = new int[12];
 	private OrbitButton[] button = new OrbitButton[5];
 	private int width;
@@ -127,6 +130,8 @@ public class OrbitAdapter implements OrbitGUI {
 				
 				MyThread mt = new MyThread();
 		        new Thread(mt).start();
+		        
+		        background = new ImageIcon(getClass().getClassLoader().getResource("images/background.png"));
 				
 		        add(dice[0] = new OrbitDice(10, 10, "DICE 1", 1));
 		        add(dice[1] = new OrbitDice(115, 10, "DICE 2", 1));
@@ -159,6 +164,7 @@ public class OrbitAdapter implements OrbitGUI {
 		        
 		        g2d.setColor(new Color(0, 0, 0));
 				g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
+				g2d.drawImage(background.getImage(), 0, 0, getWidth(), getHeight(), background.getImageObserver());
 				
 				oboard.paintComponent(g);
 				
@@ -227,9 +233,9 @@ public class OrbitAdapter implements OrbitGUI {
 				textfields[playerNo] = new OrbitTextField(width - 170, 10 + playerNo * 110, 30, "PLAYER " + (playerNo + 1), "Type username", 20, "form");
 				textfields[playerNo].setEnabled(false);
 				textfields[playerNo].setFocusTraversalKeysEnabled(false);
-				counter[playerNo] = new OrbitStatus(width - 120, 45 + playerNo * 110, false, "CASH", 400);
+				counter[playerNo] = new OrbitStatus(width - 120, 45 + playerNo * 110, false, "CREDITS", 400);
 				position[playerNo] = 0;
-				oboard.setPlayer(playerNo);
+				oboard.setPlayer(playerNo, name);
 				panel.add(textfields[playerNo]);
 			}
 			textfields[playerNo].setText(name);
@@ -307,6 +313,7 @@ public class OrbitAdapter implements OrbitGUI {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {}
 			}
+			oboard.setPlayerName(playerNo, textfields[playerNo].getText());
 			return textfields[playerNo].getText();
 		} else {
 			System.err.println("Error: TextField does not exist.");
@@ -517,6 +524,14 @@ public class OrbitAdapter implements OrbitGUI {
 		} else {
 			System.err.println("Error: Button does not exist.");
 		}
+	}
+	
+	/**
+	 * Creates a new AudioPlayer, which is used for playing audio.
+	 */
+	@Override
+	public AudioPlayer getAudio(final String path) {
+		return new AudioPlayer(path);
 	}
 	
 }

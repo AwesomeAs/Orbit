@@ -1,6 +1,7 @@
 package Tester;
 
 import Orbit.OrbitAdapter;
+import Utils.AudioPlayer;
 
 public class Startup {
 	
@@ -17,8 +18,16 @@ public class Startup {
 		adapter.movePlayer(0, 1);
 		adapter.movePlayer(1, 1);
 		
+		AudioPlayer aplay = adapter.getAudio("bgmusic.wav");
+		aplay.play(true);
+		
 		System.out.println(adapter.readPlayerName(0));
 		System.out.println(adapter.getPlayerScore(0));
+		
+		aplay.stop();
+		
+		aplay = adapter.getAudio("bgmusic_milkyway.wav");
+		aplay.play(true);
 		
 		adapter.setScreenText("HELLO WORLD");
 		
