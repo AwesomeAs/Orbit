@@ -40,12 +40,14 @@ public class OrbitBoard extends JPanel {
 	private Field[] fields;
 	private int[] playerPos;
 	private boolean[] onboard;
+	private String[] names;
 	private int size = 40;
 	private int x;
 	private int y;
 	private int scale = 150;
 	public boolean hovered = false;
 	private Font font;
+	private Font nametag;
 	
 	public OrbitBoard(int x, int y, int size) {
 		this.x = x;
@@ -54,17 +56,32 @@ public class OrbitBoard extends JPanel {
 		fields = new Field[size];
 		players = new ImageIcon[size];
 		playerPos = new int[size];
+		names = new String[size];
 		onboard = new boolean[size];
 		font = new FontManager("ProFontWindows.ttf", 42).get();
+		nametag = new FontManager("ProFontWindows.ttf", 16).get();
 	}
 	
 	
 	
-	public void setPlayer(int no) {
+	public void setPlayer(int no, String name) {
 		try {
-			players[no] = new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("images/pokemons/" + no + ".png")));
+			players[no] = new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("images/spaceships/" + no + ".png")));
 		} catch (IOException e) {}
 		playerPos[no] = 0;
+		if (name.length() == 0) {
+			names[no] = "PLAYER " + (no + 1);
+		} else {
+			names[no] = name;
+		}
+	}
+	
+	public void setPlayerName(int no, String name) {
+		if (name.length() == 0) {
+			names[no] = "PLAYER " + (no + 1);
+		} else {
+			names[no] = name;
+		}
 	}
 	
 	public void setPlayerPos(int no, int fieldNo) {
@@ -172,6 +189,7 @@ public class OrbitBoard extends JPanel {
 			
 		});
 		
+		g2d.setFont(nametag);
 		for (int j = 0; j < size; j++) {
 			if (ppos[j] != null && players[ppos[j][2]] != null && (ppos[j][0] != 0 || ppos[j][1] != 0)) {
 				int i = ppos[j][2];
@@ -179,6 +197,10 @@ public class OrbitBoard extends JPanel {
 					ppos[j][0],
 					ppos[j][1],
 					100, 100, players[i].getImageObserver());
+				g2d.setColor(new Color(0, 0, 0, 100));
+				g2d.drawString(names[i], ppos[j][0] + 51 - (int)nametag.getStringBounds(names[i], g2d.getFontRenderContext()).getWidth() / 2, ppos[j][1] + 12);
+				g2d.setColor(new Color(35, 185, 185));
+				g2d.drawString(names[i], ppos[j][0] + 50 - (int)nametag.getStringBounds(names[i], g2d.getFontRenderContext()).getWidth() / 2, ppos[j][1] + 10);
 			}
 		}
 		
