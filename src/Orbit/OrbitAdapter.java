@@ -22,16 +22,17 @@ public class OrbitAdapter implements OrbitGUI {
 	
 	private static OrbitView window;
 	private static JPanel panel;
-	private OrbitTextField[] textfields = new OrbitTextField[20];
+	private OrbitTextField[] textfields = new OrbitTextField[12];
 	private OrbitDice[] dice = new OrbitDice[2];
-	private OrbitStatus[] counter = new OrbitStatus[20];
-	private int[] position = new int[20];
+	private OrbitStatus[] counter = new OrbitStatus[12];
+	private int[] position = new int[12];
 	private OrbitButton[] button = new OrbitButton[5];
 	private int width;
 	private int height;
 	private String screentext = "";
 	private Font font;
 	private int lastButtonClick;
+	private OrbitBoard oboard;
 	private Field[] board = new Field[40];
 	private int boardsize = 40;
 	
@@ -96,9 +97,9 @@ public class OrbitAdapter implements OrbitGUI {
 	    }
 		
 		private void MousePressed(MouseEvent evt) {
-			boolean[] active = new boolean[20];
+			boolean[] active = new boolean[12];
 			boolean isActive = false;
-			for (int i = 0; i < 20; i++) {
+			for (int i = 0; i < 12; i++) {
 				if (textfields[i] != null && textfields[i].hasFocus()) {
 					active[i] = true;
 					isActive = true;
@@ -128,7 +129,7 @@ public class OrbitAdapter implements OrbitGUI {
 		        new Thread(mt).start();
 				
 		        add(dice[0] = new OrbitDice(10, 10, "DICE 1", 1));
-		        add(dice[1] = new OrbitDice(115, 10, "DICE 1", 1));
+		        add(dice[1] = new OrbitDice(115, 10, "DICE 2", 1));
 		        
 		        add(button[0] = new OrbitButton(10, height - 120, "ROLL DICE", 1, "dicecup.png"));
 		        add(button[1] = new OrbitButton(10, height - 80, "RESET GAME", 2));
@@ -139,6 +140,8 @@ public class OrbitAdapter implements OrbitGUI {
 		        button[3].setVisible(false);
 		        add(button[4] = new OrbitButton(10, height - 260, "PLACE HOTEL", 0));
 		        button[4].setVisible(false);
+		        
+		        oboard = new OrbitBoard(width / 2, height / 2, boardsize);
 		        
 		        for (int i = 0; i < button.length; i++) {
 		        	button[i].setEnabled(false);
@@ -156,6 +159,8 @@ public class OrbitAdapter implements OrbitGUI {
 		        
 		        g2d.setColor(new Color(0, 0, 0));
 				g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
+				
+				oboard.paintComponent(g);
 				
 				boolean isHover = false;
 				for (int i = 0; i < dice.length; i++) {
@@ -178,6 +183,8 @@ public class OrbitAdapter implements OrbitGUI {
 				}
 				
 				g2d.setFont(font);
+				g2d.setColor(new Color(0, 0, 0, 100));
+				g2d.drawString(screentext, width / 2 + 1 - (int)font.getStringBounds(screentext, g2d.getFontRenderContext()).getWidth() / 2, height / 2 + 2);
 				g2d.setColor(new Color(35, 185, 185, (int)(150 + dice[0].getOpacity() * 105.0)));
 		        g2d.drawString(screentext, width / 2 - (int)font.getStringBounds(screentext, g2d.getFontRenderContext()).getWidth() / 2, height / 2);
 				
@@ -215,18 +222,19 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void setPlayer(int playerNo, String name) {
-		if (playerNo >= 0 && playerNo < 20) {
+		if (playerNo >= 0 && playerNo < 12) {
 			if (textfields[playerNo] == null) {
 				textfields[playerNo] = new OrbitTextField(width - 170, 10 + playerNo * 110, 30, "PLAYER " + (playerNo + 1), "Type username", 20, "form");
 				textfields[playerNo].setEnabled(false);
 				textfields[playerNo].setFocusTraversalKeysEnabled(false);
 				counter[playerNo] = new OrbitStatus(width - 120, 45 + playerNo * 110, false, "CASH", 400);
 				position[playerNo] = 0;
+				oboard.setPlayer(playerNo);
 				panel.add(textfields[playerNo]);
 			}
 			textfields[playerNo].setText(name);
 		} else {
-			System.err.println("Error: Limit is 20 players.");
+			System.err.println("Error: Limit is 12 players.");
 		}
 	}
 	
@@ -237,7 +245,7 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public String getPlayerName(int playerNo) {
-		if (playerNo >= 0 && playerNo < 20) {
+		if (playerNo >= 0 && playerNo < 12) {
 			if (textfields[playerNo] == null) {
 				if (textfields[playerNo].getText().length() == 0) {
 					return "PLAYER " + (playerNo + 1);
@@ -248,7 +256,7 @@ public class OrbitAdapter implements OrbitGUI {
 				return "PLAYER " + (playerNo + 1);
 			}
 		} else {
-			System.err.println("Error: Limit is 20 players.");
+			System.err.println("Error: Limit is 12 players.");
 			return null;
 		}
 	}
@@ -261,7 +269,7 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public String readPlayerName(int playerNo) {
-		if (playerNo >= 0 && playerNo < 20 && textfields[playerNo] != null) {
+		if (playerNo >= 0 && playerNo < 12 && textfields[playerNo] != null) {
 			textfields[playerNo].setEnabled(true);
 			textfields[playerNo].addFocusListener(new FocusListener() {
 
@@ -378,8 +386,22 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void movePlayer(int playerNo, int fieldNo) {
-		if (playerNo >= 0 && playerNo < 20 && textfields[playerNo] != null) {
+		if (playerNo >= 0 && playerNo < 12 && textfields[playerNo] != null) {
 			position[playerNo] = fieldNo % boardsize;
+			oboard.setPlayerPos(playerNo, fieldNo);
+		} else {
+			System.err.println("Error: Player does not exist.");
+		}
+	}
+	
+	/**
+	 * Resets the player's position, moving them away from the board.
+	 * @param playerNo
+	 */
+	@Override
+	public void resetPosition(int playerNo) {
+		if (playerNo >= 0 && playerNo < boardsize) {
+			oboard.resetPlayerPos(playerNo);
 		} else {
 			System.err.println("Error: Player does not exist.");
 		}
@@ -392,10 +414,7 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public int getPlayerPosition(int playerNo) {
-		if (playerNo >= 0 && playerNo < 20 && textfields[playerNo] != null) {
-			return position[playerNo];
-		}
-		return 0;
+		return oboard.getPlayerPos(playerNo);
 	}
 	
 	/**
@@ -405,7 +424,7 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void setPlayerScore(int playerNo, int score) {
-		if (playerNo >= 0 && playerNo < 20 && counter[playerNo] != null) {
+		if (playerNo >= 0 && playerNo < 12 && counter[playerNo] != null) {
 			counter[playerNo].setValue(score);
 		} else {
 			System.err.println("Error: Player does not exist.");
@@ -419,7 +438,7 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public int getPlayerScore(int playerNo) {
-		if (playerNo >= 0 && playerNo < 20 && counter[playerNo] != null) {
+		if (playerNo >= 0 && playerNo < 12 && counter[playerNo] != null) {
 			return counter[playerNo].getValue();
 		}
 		return 0;

@@ -24,6 +24,8 @@ public interface OrbitGUI {
 	
 	void movePlayer(int playerNo, int fieldNo);
 	
+	void resetPosition(int playerNo);
+	
 	int getPlayerPosition(int playerNo);
 	
 	void setPlayerScore(int playerNo, int score);
