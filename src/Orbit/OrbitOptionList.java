@@ -183,25 +183,35 @@ public class OrbitOptionList extends JPanel {
 	    return arr;
 	}
 	
-	public void add(String title, int type) {
+	public OrbitOptionList add(String title, int type) {
 		titles = append(titles, title);
 		types = append(types, type);
 		options = append(options, new String[]{"0"});
 		hoverf = append(hoverf, 0);
+		return this;
 	}
 	
-	public void add(String title, int type, boolean option) {
+	public OrbitOptionList add(String title, int type, boolean option) {
 		titles = append(titles, title);
 		types = append(types, type);
 		options = append(options, new String[]{option ? "1" : "0"});
 		hoverf = append(hoverf, 0);
+		return this;
 	}
 	
-	public void add(String title, int type, String[] toptions) {
+	public OrbitOptionList add(String title, int type, String[] toptions) {
 		titles = append(titles, title);
 		types = append(types, type);
 		options = append(options, toptions);
 		hoverf = append(hoverf, 0);
+		return this;
+	}
+	
+	public OrbitOptionList addOption(int index, String value) {
+		if (index >= 0 && index < options.length) {
+			options[index] = append(options[index], value);
+		}
+		return this;
 	}
 	
 	public OrbitOptionList(int x, int y) {
@@ -257,6 +267,8 @@ public class OrbitOptionList extends JPanel {
 		if (visible) {
 			for (int i = 0; i < titles.length; i++) {
 				if (i < types.length && i < options.length) {
+					g2d.setColor(new Color(0, 0, 0, 200));
+					g2d.fillRect(x, y + i * 45, w, 35);
 					g2d.setPaint(
 							new GradientPaint(x, y, new Color(30, 145, 140, 75),
 									x + w, y, new Color(35, 185, 185, 30)));

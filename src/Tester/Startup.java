@@ -18,11 +18,16 @@ public class Startup {
 		adapter.movePlayer(0, 1);
 		adapter.movePlayer(1, 1);
 		
+		adapter.addLanguage("English");
+		adapter.addLanguage("Danish");
+		
 		AudioPlayer aplay = adapter.getAudio("bgmusic.wav");
 		aplay.play(true);
 		
 		System.out.println(adapter.readPlayerName(0));
 		System.out.println(adapter.getPlayerScore(0));
+		System.out.println(adapter.getDieType());
+		System.out.println(adapter.getLanguage());
 		
 		aplay.stop();
 		
@@ -33,6 +38,8 @@ public class Startup {
 		
 		while (true) {
 			if (adapter.clickButton() == 0) {
+				adapter.setDieType(true);
+				adapter.setLanguage((int)Math.floor(Math.random() * 2));
 				System.out.println("Rolling dice!");
 				System.out.println(adapter.getField(45));
 			} else {

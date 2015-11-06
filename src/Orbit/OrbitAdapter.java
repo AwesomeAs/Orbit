@@ -30,6 +30,7 @@ public class OrbitAdapter implements OrbitGUI {
 	private ImageIcon background;
 	private int[] position = new int[12];
 	private OrbitButton[] button = new OrbitButton[5];
+	private OrbitOptionList options;
 	private int width;
 	private int height;
 	private String screentext = "";
@@ -38,17 +39,6 @@ public class OrbitAdapter implements OrbitGUI {
 	private OrbitBoard oboard;
 	private Field[] board = new Field[40];
 	private int boardsize = 40;
-	
-	public OrbitAdapter(int width, int height) {
-		if (window == null) {
-			this.width = width;
-			this.height = height;
-			font = new FontManager("ProFontWindows.ttf", 48).get();
-			window = new OrbitView();
-			window.setSize(width, height);
-			window.setVisible(true);
-		}
-	}
 	
 	public OrbitAdapter(int width, int height, int boardsize) {
 		if (window == null) {
@@ -61,6 +51,10 @@ public class OrbitAdapter implements OrbitGUI {
 			window.setSize(width, height);
 			window.setVisible(true);
 		}
+	}
+	
+	public OrbitAdapter(int width, int height) {
+		this(width, height, 40);
 	}
 	
 	private class OrbitView extends JFrame {
@@ -136,6 +130,8 @@ public class OrbitAdapter implements OrbitGUI {
 		        add(dice[0] = new OrbitDice(10, 10, "DICE 1", 1));
 		        add(dice[1] = new OrbitDice(115, 10, "DICE 2", 1));
 		        
+		        add(options = new OrbitOptionList(10, 80).add("DICE 20-SIDES", 0).add("LANGUAGE", 2, new String[]{"English", "0"}));
+		        
 		        add(button[0] = new OrbitButton(10, height - 120, "ROLL DICE", 1, "dicecup.png"));
 		        add(button[1] = new OrbitButton(10, height - 80, "RESET GAME", 2));
 		        
@@ -188,12 +184,19 @@ public class OrbitAdapter implements OrbitGUI {
 					}
 				}
 				
+				options.paintComponent(g);
+				
 				g2d.setFont(font);
 				g2d.setColor(new Color(0, 0, 0, 100));
 				g2d.drawString(screentext, width / 2 + 1 - (int)font.getStringBounds(screentext, g2d.getFontRenderContext()).getWidth() / 2, height / 2 + 2);
 				g2d.setColor(new Color(35, 185, 185, (int)(150 + dice[0].getOpacity() * 105.0)));
 		        g2d.drawString(screentext, width / 2 - (int)font.getStringBounds(screentext, g2d.getFontRenderContext()).getWidth() / 2, height / 2);
 				
+		        options.paintDropdown(g);
+		        if (options.hovered) {
+		        	isHover = true;
+		        }
+		        
 				if (isHover) {
 					setCursor(new Cursor(Cursor.HAND_CURSOR));
 				} else {
@@ -528,10 +531,70 @@ public class OrbitAdapter implements OrbitGUI {
 	
 	/**
 	 * Creates a new AudioPlayer, which is used for playing audio.
+	 * @return an AudioPlayer object
 	 */
 	@Override
 	public AudioPlayer getAudio(final String path) {
 		return new AudioPlayer(path);
 	}
+	
+	/**
+	 * Adds the string to the dropdown menu specifying supported languages.
+	 */
+	@Override
+	public void addLanguage(String lang) {
+		options.addOption(1, lang);
+	}
+	
+	/**
+	 * Checks the option list for the player's option on whether to use a 6-sided die or 20-sided die.
+	 * @return boolean indicating die type
+	 */
+	@Override
+	public boolean getDieType() {
+		return options.options[0][0] == "1";
+	}
+	
+	/**
+	 * Checks the currently selected language, defaults to English.
+	 * @return language string from dropdown
+	 */
+	@Override
+	public String getLanguage() {
+		return options.options[1][0];
+	}
+	
+	/**
+	 * Overrides an existing dropdown option for the language dropdown menu. Does nothing if the option does not exist.
+	 */
+	@Override
+	public void changeLanguage(int optionNo, String newLang) {
+		if (optionNo >= 0 && optionNo < options.options[1].length - 2) {
+			if (options.options[1][0].equals(options.options[1][optionNo + 2])) {
+				options.options[1][0] = newLang;
+			}
+			options.options[1][optionNo + 2] = newLang;
+		}
+	}
+	
+	/**
+	 * Overwrites the value for whether to use a 6-sided die or 20-sided die.
+	 */
+	@Override
+	public void setDieType(boolean isTwentySided) {
+		options.options[0][0] = isTwentySided ? "1" : "0";
+	}
+	
+	/**
+	 * If the option exists in the dropdown menu for languages, the new language is set.
+	 */
+	@Override
+	public void setLanguage(int optionNo) {
+		if (optionNo >= 0 && optionNo < options.options[1].length - 2) {
+			options.options[1][0] = options.options[1][optionNo + 2];
+		}
+	}
+	
+	
 	
 }

@@ -43,4 +43,16 @@ public interface OrbitGUI {
 	
 	AudioPlayer getAudio(final String path);
 	
+	void addLanguage(String lang);
+	
+	void changeLanguage(int optionNo, String newLang);
+	
+	boolean getDieType();
+	
+	String getLanguage();
+	
+	void setDieType(boolean isTwentySided);
+	
+	void setLanguage(int optionNo);
+	
 }
