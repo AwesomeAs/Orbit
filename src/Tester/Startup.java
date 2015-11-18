@@ -5,7 +5,6 @@ import java.util.Scanner;
 //import Networking.Matchmaker;
 import Orbit.OrbitAdapter;
 import Utils.AudioPlayer;
-import desktop_resources.GUI;
 
 public class Startup {
 	
@@ -69,6 +68,7 @@ public class Startup {
 				System.out.println(adapter.getField(45));
 			} else {
 				System.out.println("Hit reset game");
+				//adapter.closeOldGUI();
 			}
 		}
 		

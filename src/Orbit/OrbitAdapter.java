@@ -297,6 +297,9 @@ public class OrbitAdapter implements OrbitGUI {
 				System.err.println("Error: Limit is 12 players.");
 			}
 		} else {
+			if (name.equals(null) || name.isEmpty()) {
+				name = GUI.getUserString("Indtast navn for spiller " + (playerNo + 1));
+			}
 			int resName = 0;
 			boolean found = true;
 			while (found) {
@@ -410,7 +413,7 @@ public class OrbitAdapter implements OrbitGUI {
 				return null;
 			}
 		} else {
-			return GUI.getUserString("Indtast navn for spiller " + (playerNo + 1));
+			return getPlayerName(playerNo); //GUI.getUserString("Indtast navn for spiller " + (playerNo + 1));
 		}
 	}
 	
@@ -871,6 +874,18 @@ public class OrbitAdapter implements OrbitGUI {
 	public void setLoaderVisible(boolean visible) {
 		if (window != null) {
 			loader.setVisible(visible);
+		}
+	}
+
+	@Override
+	public boolean isOldGUI() {
+		return window == null;
+	}
+
+	@Override
+	public void closeOldGUI() {
+		if (window == null) {
+			GUI.close();
 		}
 	}
 }

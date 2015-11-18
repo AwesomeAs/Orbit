@@ -69,4 +69,8 @@ public interface OrbitGUI {
 	
 	void setLoaderVisible(boolean visible);
 	
+	boolean isOldGUI();
+	
+	void closeOldGUI();
+	
 }
