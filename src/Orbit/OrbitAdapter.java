@@ -19,6 +19,7 @@ import Utils.AudioPlayer;
 import Utils.EventListener;
 import Utils.FontManager;
 import Utils.MouseController;
+import desktop_resources.GUI;
 
 public class OrbitAdapter implements OrbitGUI {
 	
@@ -27,6 +28,7 @@ public class OrbitAdapter implements OrbitGUI {
 	private OrbitTextField[] textfields = new OrbitTextField[12];
 	private OrbitDice[] dice = new OrbitDice[2];
 	private OrbitStatus[] counter = new OrbitStatus[12];
+	private OrbitLoader loader;
 	private ImageIcon background;
 	private int[] position = new int[12];
 	private OrbitButton[] button = new OrbitButton[5];
@@ -34,27 +36,40 @@ public class OrbitAdapter implements OrbitGUI {
 	private int width;
 	private int height;
 	private String screentext = "";
+	private String screendesc = "";
 	private Font font;
+	private Font descfont;
 	private int lastButtonClick;
 	private OrbitBoard oboard;
 	private Field[] board = new Field[40];
 	private int boardsize = 40;
+	private String[] oldPlayerNames = new String[12];
+	private int[] oldPlayerPos = new int[12];
+	private int[] oldDiceValues = new int[]{1, 1};
+	private int[] oldPlayerScore = new int[12];
+	private boolean[] oldButtonVisible = new boolean[5];
 	
-	public OrbitAdapter(int width, int height, int boardsize) {
-		if (window == null) {
-			this.width = width;
-			this.height = height;
-			this.boardsize = boardsize;
-			board = new Field[boardsize];
-			font = new FontManager("ProFontWindows.ttf", 48).get();
-			window = new OrbitView();
-			window.setSize(width, height);
-			window.setVisible(true);
+	public OrbitAdapter(int width, int height, int boardsize, boolean useOldGUI) {
+		if (!useOldGUI) {
+			if (window == null) {
+				this.width = width;
+				this.height = height;
+				this.boardsize = boardsize;
+				board = new Field[boardsize];
+				font = new FontManager("ProFontWindows.ttf", 48).get();
+				descfont = new FontManager("ProFontWindows.ttf", 16).get();
+				window = new OrbitView();
+				window.setSize(width, height);
+				window.setVisible(true);
+			}
+		} else {
+			oldButtonVisible[0] = true;
+	        oldButtonVisible[1] = true;
 		}
 	}
 	
 	public OrbitAdapter(int width, int height) {
-		this(width, height, 40);
+		this(width, height, 40, false);
 	}
 	
 	private class OrbitView extends JFrame {
@@ -132,6 +147,9 @@ public class OrbitAdapter implements OrbitGUI {
 		        
 		        add(options = new OrbitOptionList(10, 80).add("DICE 20-SIDES", 0).add("LANGUAGE", 2, new String[]{"English", "0"}));
 		        
+		        add(loader = new OrbitLoader(width / 2 - 75, height / 2 - 40, 150, 0));
+		        loader.setVisible(false);
+		        
 		        add(button[0] = new OrbitButton(10, height - 120, "ROLL DICE", 1, "dicecup.png"));
 		        add(button[1] = new OrbitButton(10, height - 80, "RESET GAME", 2));
 		        
@@ -184,19 +202,51 @@ public class OrbitAdapter implements OrbitGUI {
 					}
 				}
 				
+				loader.paintComponent(g);
+				loader.angle += 20;
+				loader.angle = loader.angle % 360;
+				
 				options.paintComponent(g);
 				
 				g2d.setFont(font);
-				g2d.setColor(new Color(0, 0, 0, 100));
-				g2d.drawString(screentext, width / 2 + 1 - (int)font.getStringBounds(screentext, g2d.getFontRenderContext()).getWidth() / 2, height / 2 + 2);
+				g2d.setColor(new Color(0, 0, 0, 50));
+				for (int x = -1; x <= 2; x++) {
+					for (int y = -1; y <= 2; y++) {
+							g2d.drawString(screentext, width / 2 + 1 - (int)font.getStringBounds(screentext, g2d.getFontRenderContext()).getWidth() / 2 - 1 + x,
+									height / 2 + (loader.isVisible() ? -59 : 1) + y);
+					}
+				}
 				g2d.setColor(new Color(35, 185, 185, (int)(150 + dice[0].getOpacity() * 105.0)));
-		        g2d.drawString(screentext, width / 2 - (int)font.getStringBounds(screentext, g2d.getFontRenderContext()).getWidth() / 2, height / 2);
-				
-		        options.paintDropdown(g);
-		        if (options.hovered) {
-		        	isHover = true;
-		        }
+				g2d.drawString(screentext, width / 2 - (int)font.getStringBounds(screentext, g2d.getFontRenderContext()).getWidth() / 2, height / 2 +
+		        		(loader.isVisible() ? -60 : 0));
 		        
+		        g2d.setFont(descfont);
+				g2d.setColor(new Color(0, 0, 0, 50));
+				for (int x = -1; x <= 2; x++) {
+					for (int y = -1; y <= 2; y++) {
+						int ly = 0;
+						for (String line : screendesc.split("\n")) {
+							g2d.drawString(line, width / 2 - (int)descfont.getStringBounds(line, g2d.getFontRenderContext()).getWidth() / 2, height - 98 +
+									y * 24);
+							g2d.drawString(screendesc, width / 2 + x - (int)descfont.getStringBounds(screendesc, g2d.getFontRenderContext()).getWidth() / 2,
+									height - 100 + y + ly);
+							ly++;
+						}
+					}
+				}
+				g2d.setColor(new Color(35, 185, 185, (int)(150 + dice[0].getOpacity() * 105.0)));
+				int y = 0;
+				for (String line : screendesc.split("\n")) {
+					g2d.drawString(line, width / 2 - (int)descfont.getStringBounds(line, g2d.getFontRenderContext()).getWidth() / 2, height - 98 +
+							y * 24);
+					y++;
+				}
+				
+				options.paintDropdown(g);
+				if (options.hovered) {
+					isHover = true;
+				}
+				
 				if (isHover) {
 					setCursor(new Cursor(Cursor.HAND_CURSOR));
 				} else {
@@ -231,19 +281,42 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void setPlayer(int playerNo, String name) {
-		if (playerNo >= 0 && playerNo < 12) {
-			if (textfields[playerNo] == null) {
-				textfields[playerNo] = new OrbitTextField(width - 170, 10 + playerNo * 110, 30, "PLAYER " + (playerNo + 1), "Type username", 20, "form");
-				textfields[playerNo].setEnabled(false);
-				textfields[playerNo].setFocusTraversalKeysEnabled(false);
-				counter[playerNo] = new OrbitStatus(width - 120, 45 + playerNo * 110, false, "CREDITS", 400);
-				position[playerNo] = 0;
-				oboard.setPlayer(playerNo, name);
-				panel.add(textfields[playerNo]);
+		if (window != null) {
+			if (playerNo >= 0 && playerNo < 12) {
+				if (textfields[playerNo] == null) {
+					textfields[playerNo] = new OrbitTextField(width - 170, 10 + playerNo * 110, 30, "PLAYER " + (playerNo + 1), "Type username", 20, "form");
+					textfields[playerNo].setEnabled(false);
+					textfields[playerNo].setFocusTraversalKeysEnabled(false);
+					counter[playerNo] = new OrbitStatus(width - 120, 45 + playerNo * 110, false, "CREDITS", 400);
+					position[playerNo] = 0;
+					oboard.setPlayer(playerNo, name);
+					panel.add(textfields[playerNo]);
+				}
+				textfields[playerNo].setText(name);
+			} else {
+				System.err.println("Error: Limit is 12 players.");
 			}
-			textfields[playerNo].setText(name);
 		} else {
-			System.err.println("Error: Limit is 12 players.");
+			int resName = 0;
+			boolean found = true;
+			while (found) {
+				found = false;
+				for (String val : oldPlayerNames) {
+					if ((resName == 0 && name.equals(val)) || (resName > 0 && (name + " " + (resName + 1)).equals(val))) {
+						resName++;
+						found = true;
+					}
+				}
+			}
+			if (resName > 0) {
+				name += (" " + (resName + 1));
+			}
+			if (oldPlayerNames[playerNo] == null) {
+				GUI.addPlayer(name, 400);
+			}
+			oldPlayerNames[playerNo] = name;
+			oldPlayerPos[playerNo] = 0;
+			oldPlayerScore[playerNo] = 400;
 		}
 	}
 	
@@ -254,19 +327,32 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public String getPlayerName(int playerNo) {
-		if (playerNo >= 0 && playerNo < 12) {
-			if (textfields[playerNo] == null) {
-				if (textfields[playerNo].getText().length() == 0) {
-					return "PLAYER " + (playerNo + 1);
+		if (window != null) {
+			if (playerNo >= 0 && playerNo < 12) {
+				if (textfields[playerNo] == null) {
+					if (textfields[playerNo].getText().length() == 0) {
+						return "PLAYER " + (playerNo + 1);
+					} else {
+						return textfields[playerNo].getText();
+					}
 				} else {
-					return textfields[playerNo].getText();
+					return "PLAYER " + (playerNo + 1);
 				}
 			} else {
-				return "PLAYER " + (playerNo + 1);
+				System.err.println("Error: Limit is 12 players.");
+				return null;
 			}
 		} else {
-			System.err.println("Error: Limit is 12 players.");
-			return null;
+			if (playerNo >= 0 && playerNo < 12) {
+				if (oldPlayerNames[playerNo] != null) {
+					return oldPlayerNames[playerNo];
+				} else {
+					return "PLAYER " + (playerNo + 1);
+				}
+			} else {
+				System.err.println("Error: Limit is 12 players.");
+				return null;
+			}
 		}
 	}
 	
@@ -278,49 +364,53 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public String readPlayerName(int playerNo) {
-		if (playerNo >= 0 && playerNo < 12 && textfields[playerNo] != null) {
-			textfields[playerNo].setEnabled(true);
-			textfields[playerNo].addFocusListener(new FocusListener() {
-
-				@Override
-				public void focusGained(FocusEvent e) {}
-
-				@Override
-				public void focusLost(FocusEvent e) {
-					if (textfields[playerNo].isEnabled()) {
-						textfields[playerNo].setEnabled(false);
-					}
-				}
-				
-			});
-			textfields[playerNo].addKeyListener(new KeyListener() {
-
-				@Override
-				public void keyTyped(KeyEvent e) {}
-
-				@Override
-				public void keyPressed(KeyEvent e) {
-					if (textfields[playerNo].isEnabled()) {
-						if (e.getKeyCode() == 9 || e.getKeyCode() == 10) {
+		if (window != null) {
+			if (playerNo >= 0 && playerNo < 12 && textfields[playerNo] != null) {
+				textfields[playerNo].setEnabled(true);
+				textfields[playerNo].addFocusListener(new FocusListener() {
+	
+					@Override
+					public void focusGained(FocusEvent e) {}
+	
+					@Override
+					public void focusLost(FocusEvent e) {
+						if (textfields[playerNo].isEnabled()) {
 							textfields[playerNo].setEnabled(false);
 						}
 					}
+					
+				});
+				textfields[playerNo].addKeyListener(new KeyListener() {
+	
+					@Override
+					public void keyTyped(KeyEvent e) {}
+	
+					@Override
+					public void keyPressed(KeyEvent e) {
+						if (textfields[playerNo].isEnabled()) {
+							if (e.getKeyCode() == 9 || e.getKeyCode() == 10) {
+								textfields[playerNo].setEnabled(false);
+							}
+						}
+					}
+	
+					@Override
+					public void keyReleased(KeyEvent e) {}
+					
+				});
+				while (textfields[playerNo].isEnabled()) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {}
 				}
-
-				@Override
-				public void keyReleased(KeyEvent e) {}
-				
-			});
-			while (textfields[playerNo].isEnabled()) {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {}
+				oboard.setPlayerName(playerNo, textfields[playerNo].getText());
+				return textfields[playerNo].getText();
+			} else {
+				System.err.println("Error: TextField does not exist.");
+				return null;
 			}
-			oboard.setPlayerName(playerNo, textfields[playerNo].getText());
-			return textfields[playerNo].getText();
 		} else {
-			System.err.println("Error: TextField does not exist.");
-			return null;
+			return GUI.getUserString("Indtast navn for spiller " + (playerNo + 1));
 		}
 	}
 	
@@ -357,8 +447,14 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void SetDice(int left, int right) {
-		dice[0].setValue(left);
-		dice[1].setValue(right);
+		if (window != null) {
+			dice[0].setValue(left);
+			dice[1].setValue(right);
+		} else {
+			GUI.setDice(left, right);
+			oldDiceValues[0] = left;
+			oldDiceValues[1] = right;
+		}
 	}
 	
 	/**
@@ -367,8 +463,10 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void SetDiceType(int sides) {
-		dice[0].setSides(sides);
-		dice[1].setSides(sides);
+		if (window != null) {
+			dice[0].setSides(sides);
+			dice[1].setSides(sides);
+		}
 	}
 	
 	/**
@@ -378,7 +476,11 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public int getDieValue(boolean right) {
-		return dice[right ? 1 : 0].getValue();
+		if (window != null) {
+			return dice[right ? 1 : 0].getValue();
+		} else {
+			return oldDiceValues[right ? 1 : 0];
+		}
 	}
 	
 	/**
@@ -396,11 +498,16 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void movePlayer(int playerNo, int fieldNo) {
-		if (playerNo >= 0 && playerNo < 12 && textfields[playerNo] != null) {
-			position[playerNo] = fieldNo % boardsize;
-			oboard.setPlayerPos(playerNo, fieldNo);
+		if (window != null) {
+			if (playerNo >= 0 && playerNo < 12 && textfields[playerNo] != null) {
+				position[playerNo] = fieldNo % boardsize;
+				oboard.setPlayerPos(playerNo, fieldNo);
+			} else {
+				System.err.println("Error: Player does not exist.");
+			}
 		} else {
-			System.err.println("Error: Player does not exist.");
+			GUI.setCar(fieldNo, getPlayerName(playerNo));
+			oldPlayerPos[playerNo] = fieldNo;
 		}
 	}
 	
@@ -410,10 +517,15 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void resetPosition(int playerNo) {
-		if (playerNo >= 0 && playerNo < boardsize) {
-			oboard.resetPlayerPos(playerNo);
+		if (window != null) {
+			if (playerNo >= 0 && playerNo < boardsize) {
+				oboard.resetPlayerPos(playerNo);
+			} else {
+				System.err.println("Error: Player does not exist.");
+			}
 		} else {
-			System.err.println("Error: Player does not exist.");
+			GUI.setCar(0, getPlayerName(playerNo));
+			oldPlayerPos[playerNo] = 0;
 		}
 	}
 	
@@ -424,7 +536,11 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public int getPlayerPosition(int playerNo) {
-		return oboard.getPlayerPos(playerNo);
+		if (window != null) {
+			return oboard.getPlayerPos(playerNo);
+		} else {
+			return oldPlayerPos[playerNo];
+		}
 	}
 	
 	/**
@@ -434,10 +550,15 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void setPlayerScore(int playerNo, int score) {
-		if (playerNo >= 0 && playerNo < 12 && counter[playerNo] != null) {
-			counter[playerNo].setValue(score);
+		if (window != null) {
+			if (playerNo >= 0 && playerNo < 12 && counter[playerNo] != null) {
+				counter[playerNo].setValue(score);
+			} else {
+				System.err.println("Error: Player does not exist.");
+			}
 		} else {
-			System.err.println("Error: Player does not exist.");
+			GUI.setBalance(getPlayerName(playerNo), score);
+			oldPlayerScore[playerNo] = score;
 		}
 	}
 	
@@ -448,10 +569,17 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public int getPlayerScore(int playerNo) {
-		if (playerNo >= 0 && playerNo < 12 && counter[playerNo] != null) {
-			return counter[playerNo].getValue();
+		if (window != null) {
+			if (playerNo >= 0 && playerNo < 12 && counter[playerNo] != null) {
+				return counter[playerNo].getValue();
+			}
+			return 0;
+		} else {
+			if (playerNo >= 0 && playerNo < 12) {
+				return oldPlayerScore[playerNo];
+			}
+			return 0;
 		}
-		return 0;
 	}
 	
 	/**
@@ -461,6 +589,15 @@ public class OrbitAdapter implements OrbitGUI {
 	@Override
 	public void setScreenText(String text) {
 		screentext = text;
+	}
+	
+	/**
+	 * Sets the text to display a description on the screen. Use an empty string to clear.
+	 * @param desc
+	 */
+	@Override
+	public void setScreenDesc(String desc) {
+		screendesc = desc;
 	}
 	
 	/**
@@ -482,32 +619,78 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public int clickButton() {
-		lastButtonClick = -1;
-		for (int i = 0; i < button.length; i++) {
-			button[i].setEnabled(true);
-			button[i].onclick.addListener(new EventListener() {
-				@Override
-				public void event() {
-					for (int i = 0; i < button.length; i++) {
-						if (button[i].hovered) {
-							lastButtonClick = i;
-							for (int j = 0; j < button.length; j++) {
-								button[j].setEnabled(false);
+		if (window != null) {
+			lastButtonClick = -1;
+			for (int i = 0; i < button.length; i++) {
+				button[i].setEnabled(true);
+				button[i].onclick.addListener(new EventListener() {
+					@Override
+					public void event() {
+						for (int i = 0; i < button.length; i++) {
+							if (button[i].hovered) {
+								lastButtonClick = i;
+								for (int j = 0; j < button.length; j++) {
+									button[j].setEnabled(false);
+								}
+								break;
 							}
-							break;
 						}
 					}
+					@Override
+					public void event(Object[] args) {}
+				});
+			}
+			while (lastButtonClick == -1) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {}
+			}
+			return lastButtonClick;
+		} else {
+			int size = 0;
+			String[] buttons;
+			for (int i = 0; i < oldButtonVisible.length; i++) {
+				if (oldButtonVisible[i]) {
+					size++;
 				}
-				@Override
-				public void event(Object[] args) {}
-			});
+			}
+			buttons = new String[size];
+			size = 0;
+			if (oldButtonVisible[0]) {
+				buttons[size] = "Kast terninger";
+				size++;
+			}
+			if (oldButtonVisible[1]) {
+				buttons[size] = "Genstart";
+				size++;
+			}
+			if (oldButtonVisible[2]) {
+				buttons[size] = "Køb felt";
+				size++;
+			}
+			if (oldButtonVisible[3]) {
+				buttons[size] = "Placer hus";
+				size++;
+			}
+			if (oldButtonVisible[4]) {
+				buttons[size] = "Placer hotel";
+				size++;
+			}
+			// if append to array if button 2, 3 or 4 is visible!
+			String result = GUI.getUserButtonPressed("Choose action", buttons);
+			switch (result) {
+				case "Kast terninger":
+					return 0;
+				case "Genstart":
+					return 1;
+				case "Køb felt":
+					return 2;
+				case "Placer hus":
+					return 3;
+				default:
+					return 4;
+			}
 		}
-		while (lastButtonClick == -1) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {}
-		}
-		return lastButtonClick;
 	}
 
 	/**
@@ -522,10 +705,18 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void setButtonVisible(int buttonNo, boolean visible) {
-		if (buttonNo >= 0 && buttonNo < 5) {
-			button[buttonNo].setVisible(visible);
+		if (window != null) {
+			if (buttonNo >= 0 && buttonNo < 5) {
+				button[buttonNo].setVisible(visible);
+			} else {
+				System.err.println("Error: Button does not exist.");
+			}
 		} else {
-			System.err.println("Error: Button does not exist.");
+			if (buttonNo >= 0 && buttonNo < 5) {
+				oldButtonVisible[buttonNo] = visible;
+			} else {
+				System.err.println("Error: Button does not exist.");
+			}
 		}
 	}
 	
@@ -543,7 +734,9 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void addLanguage(String lang) {
-		options.addOption(1, lang);
+		if (window != null) {
+			options.addOption(1, lang);
+		}
 	}
 	
 	/**
@@ -552,7 +745,11 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public boolean getDieType() {
-		return options.options[0][0] == "1";
+		if (window != null) {
+			return options.options[0][0] == "1";
+		} else {
+			return false;
+		}
 	}
 	
 	/**
@@ -561,7 +758,11 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public String getLanguage() {
-		return options.options[1][0];
+		if (window != null) {
+			return options.options[1][0];
+		} else {
+			return "English";
+		}
 	}
 	
 	/**
@@ -569,11 +770,13 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void changeLanguage(int optionNo, String newLang) {
-		if (optionNo >= 0 && optionNo < options.options[1].length - 2) {
-			if (options.options[1][0].equals(options.options[1][optionNo + 2])) {
-				options.options[1][0] = newLang;
+		if (window != null) {
+			if (optionNo >= 0 && optionNo < options.options[1].length - 2) {
+				if (options.options[1][0].equals(options.options[1][optionNo + 2])) {
+					options.options[1][0] = newLang;
+				}
+				options.options[1][optionNo + 2] = newLang;
 			}
-			options.options[1][optionNo + 2] = newLang;
 		}
 	}
 	
@@ -582,7 +785,9 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void setDieType(boolean isTwentySided) {
-		options.options[0][0] = isTwentySided ? "1" : "0";
+		if (window != null) {
+			options.options[0][0] = isTwentySided ? "1" : "0";
+		}
 	}
 	
 	/**
@@ -590,11 +795,82 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void setLanguage(int optionNo) {
-		if (optionNo >= 0 && optionNo < options.options[1].length - 2) {
-			options.options[1][0] = options.options[1][optionNo + 2];
+		if (window != null) {
+			if (optionNo >= 0 && optionNo < options.options[1].length - 2) {
+				options.options[1][0] = options.options[1][optionNo + 2];
+			}
+		}
+	}
+	
+	/**
+	 * Sets the title and placeholder for all players' textfields.
+	 */
+	@Override
+	public void setPlayerLanguage(String title, String placeholder) {
+		if (window != null) {
+			for (int i = 0; i < textfields.length; i++) {
+				if (textfields[i] != null) {
+					textfields[i].label = title + " " + (i + 1);
+					textfields[i].desc = placeholder;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Change text on the dice displays.
+	 */
+	@Override
+	public void setDieLanguage(String text) {
+		if (window != null) {
+			dice[0].setDesc(text + " 1");
+			dice[1].setDesc(text + " 2");
 		}
 	}
 	
 	
+	@Override
+	public void setCounterLanguage(String text) {
+		if (window != null) {
+			for (int i = 0; i < counter.length; i++) {
+				if (counter[i] != null) {
+					counter[i].setDesc(text);
+				}
+			}
+		}
+	}
 	
+	/**
+	 * Sets the title for a given option.
+	 */
+	@Override
+	public void setOptionLanguage(int optionNo, String title) {
+		if (window != null) {
+			if (optionNo >= 0 && optionNo < options.titles.length && options.titles[optionNo] != null) {
+				options.titles[optionNo] = title;
+			}
+		}
+	}
+	
+	/**
+	 * Sets the text on a given button.
+	 */
+	@Override
+	public void setButtonLanguage(int buttonNo, String text) {
+		if (window != null) {
+			if (buttonNo >= 0 && buttonNo < button.length && button[buttonNo] != null) {
+				button[buttonNo].setText(text);
+			}
+		}
+	}
+	
+	/**
+	 * Sets if our loader widget should be visible in the center of the screen
+	 */
+	@Override
+	public void setLoaderVisible(boolean visible) {
+		if (window != null) {
+			loader.setVisible(visible);
+		}
+	}
 }

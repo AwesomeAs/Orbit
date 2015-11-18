@@ -35,6 +35,8 @@ public interface OrbitGUI {
 	
 	void setScreenText(String text);
 	
+	void setScreenDesc(String desc);
+	
 	void moveMouse(int x, int y, boolean clickAfterMove);
 	
 	int clickButton();
@@ -54,5 +56,17 @@ public interface OrbitGUI {
 	void setDieType(boolean isTwentySided);
 	
 	void setLanguage(int optionNo);
+	
+	void setPlayerLanguage(String title, String placeholder);
+	
+	void setOptionLanguage(int optionNo, String title);
+	
+	void setButtonLanguage(int buttonNo, String text);
+	
+	void setDieLanguage(String text);
+	
+	void setCounterLanguage(String text);
+	
+	void setLoaderVisible(boolean visible);
 	
 }

@@ -90,38 +90,43 @@ public class OrbitLoader extends JPanel {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
 		//g2d.setPaint(new GradientPaint(x, y, new Color(30, 145, 140), x, y + s, new Color(35, 185, 185)));
-		g2d.setStroke(new BasicStroke(2));
 		
-		if (mode == 0) {
-			end = angle + step;
-			g2d.setColor(new Color(15, 125, 125, 100));
-			g2d.drawArc(x, y, s, s, 96 - (int)angle, 347 - (int)(step));
-			g2d.setColor(new Color(35, 185, 185));
-			g2d.drawArc(x, y, s, s, 90 - (int)(angle), (int)(angle - end));
-		} else if (mode == 1) {
-			g2d.setColor(new Color(15, 125, 125, 100));
-			g2d.drawArc(x, y, s, s, 96 - (int)angle, 347 - (int)(step + end));
-			g2d.setColor(new Color(35, 185, 185));
-			g2d.drawArc(x, y, s, s, 90 - (int)(angle), (int)(angle - step) - 1);
-			g2d.setColor(new Color(35, 185, 185, 160));
-			g2d.drawArc(x, y, s, s, 82 - (int)(angle + step), (int)(angle - end) + 8);
-		} else {
-			float empty = 0;
-			for (int i = 0; i < colors.length; i++) {
-				if (dist.length > i) {
-					empty += dist[i];
-					g2d.setColor(colors[i]);
-					g2d.setStroke(new BasicStroke(2));
-					g2d.drawArc(x, y, s, s, 90 - (int)empty, (int)dist[i] - 2);
-					g2d.setStroke(new BasicStroke(1));
-					g2d.drawArc(x + 4, y + 4, s - 8, s - 8, 90 - (int)empty, (int)dist[i] - 2);
-				}
-			}
-			g2d.setColor(new Color(15, 125, 125, 100));
+		if (this.isVisible()) {
+			g2d.setStroke(new BasicStroke(6));
+			g2d.setColor(new Color(0, 0, 0, 100));
+			g2d.drawArc(x, y, s, s, 0, 360);
 			g2d.setStroke(new BasicStroke(2));
-			g2d.drawArc(x, y, s, s, 91, (int)(357 - empty));
-			g2d.setStroke(new BasicStroke(1));
-			g2d.drawArc(x + 4, y + 4, s - 8, s - 8, 91, (int)(357 - empty));
+			if (mode == 0) {
+				end = angle + step;
+				g2d.setColor(new Color(15, 125, 125, 150));
+				g2d.drawArc(x, y, s, s, 96 - (int)angle, 347 - (int)(step));
+				g2d.setColor(new Color(35, 185, 185));
+				g2d.drawArc(x, y, s, s, 90 - (int)(angle), (int)(angle - end));
+			} else if (mode == 1) {
+				g2d.setColor(new Color(15, 125, 125, 150));
+				g2d.drawArc(x, y, s, s, 96 - (int)angle, 347 - (int)(step + end));
+				g2d.setColor(new Color(35, 185, 185));
+				g2d.drawArc(x, y, s, s, 90 - (int)(angle), (int)(angle - step) - 1);
+				g2d.setColor(new Color(35, 185, 185, 180));
+				g2d.drawArc(x, y, s, s, 82 - (int)(angle + step), (int)(angle - end) + 8);
+			} else {
+				float empty = 0;
+				for (int i = 0; i < colors.length; i++) {
+					if (dist.length > i) {
+						empty += dist[i];
+						g2d.setColor(colors[i]);
+						g2d.setStroke(new BasicStroke(2));
+						g2d.drawArc(x, y, s, s, 90 - (int)empty, (int)dist[i] - 2);
+						g2d.setStroke(new BasicStroke(1));
+						g2d.drawArc(x + 4, y + 4, s - 8, s - 8, 90 - (int)empty, (int)dist[i] - 2);
+					}
+				}
+				g2d.setColor(new Color(15, 125, 125, 100));
+				g2d.setStroke(new BasicStroke(2));
+				g2d.drawArc(x, y, s, s, 91, (int)(357 - empty));
+				g2d.setStroke(new BasicStroke(1));
+				g2d.drawArc(x + 4, y + 4, s - 8, s - 8, 91, (int)(357 - empty));
+			}
 		}
 	}
 }

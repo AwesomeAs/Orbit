@@ -97,6 +97,10 @@ public class OrbitButton extends JButton {
 		return (int)font.getStringBounds(text, g2d.getFontRenderContext()).getWidth();
 	}
 	
+	public void setText(String text) {
+		value = text;
+	}
+	
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);

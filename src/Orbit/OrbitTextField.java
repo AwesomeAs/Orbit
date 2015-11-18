@@ -132,6 +132,14 @@ public class OrbitTextField extends JTextField implements MouseListener {
 		
 	}
 	
+	public void setPlaceholder(String placeholder) {
+		desc = placeholder;
+	}
+	
+	public void setTitle(String title) {
+		label = title;
+	}
+	
 	@Override
     public void paint(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();

@@ -81,6 +81,10 @@ public class OrbitDice extends JPanel {
 		loadFont();
 	}
 	
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+	
 	public void setValue(int value) {
 		this.value = value;
 	}

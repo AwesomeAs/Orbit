@@ -1,13 +1,37 @@
 package Tester;
 
+import java.util.Scanner;
+
+//import Networking.Matchmaker;
 import Orbit.OrbitAdapter;
 import Utils.AudioPlayer;
+import desktop_resources.GUI;
 
 public class Startup {
 	
 	public static void main(String[] args) {
 		System.out.println("Startup!");
-		OrbitAdapter adapter = new OrbitAdapter(1200, 800, 12);
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Want to use the new GUI? Write 'y' or 'n'.");
+		boolean isNew = false;
+		while (true) {
+			String got = sc.next();
+			if (got.equals("y")) {
+				isNew = true;
+				break;
+			} else if (got.equals("n")) {
+				break;
+			}
+		}
+		sc.close();
+		OrbitAdapter adapter = new OrbitAdapter(1200, 800, 12, !isNew);
+		//Matchmaker matcher = new Matchmaker("", "");
+		
+		//System.out.println(matcher.allUsers());
+		
+		adapter.setLoaderVisible(true);
+		
+		//matcher.clearCallback("talk");
 		
 		adapter.setPlayer(0, "");
 		adapter.setPlayer(1, "");
@@ -16,7 +40,7 @@ public class Startup {
 		adapter.setPlayerScore(1, 600);
 		adapter.setPlayerScore(2, 600);
 		adapter.movePlayer(0, 1);
-		adapter.movePlayer(1, 1);
+		adapter.movePlayer(1, 10);
 		
 		adapter.addLanguage("English");
 		adapter.addLanguage("Danish");
@@ -35,6 +59,7 @@ public class Startup {
 		aplay.play(true);
 		
 		adapter.setScreenText("HELLO WORLD");
+		adapter.setScreenDesc("A very very very\r\nvery very very very very very\nvery very very very very very long description.");
 		
 		while (true) {
 			if (adapter.clickButton() == 0) {

@@ -67,6 +67,10 @@ public class OrbitStatus extends JPanel {
 		return value;
 	}
 	
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+	
 	@Override
     public void paint(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
@@ -103,7 +107,7 @@ public class OrbitStatus extends JPanel {
 		g2d.fillRect(x, y, 2, 2);
 		g2d.fillRect(x + 98, y, 2, 2);
 		g2d.setFont(valuefont);
-		g2d.drawString(format(value), x + 49 - textWidth(valuefont, format(value), g2d) / 2, y + (small ? 33 : 35));
+		g2d.drawString(Integer.toString(value), x + 49 - textWidth(valuefont, Integer.toString(value), g2d) / 2, y + (small ? 33 : 35));
 		g2d.setFont(font);
 		g2d.drawString(desc, x + 49 - textWidth(font, desc, g2d) / 2, y + (small ? 18 : 50));
 		g2d.setColor(new Color(35, 185, 185, 100));
