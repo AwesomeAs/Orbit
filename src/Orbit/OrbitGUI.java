@@ -1,7 +1,7 @@
 package Orbit;
 
-import GameData.*;
 import Utils.AudioPlayer;
+import game.*;
 
 public interface OrbitGUI {
 	
@@ -11,7 +11,7 @@ public interface OrbitGUI {
 	
 	String readPlayerName(int playerNo);
 	
-	void setField(int fieldNo, Field data);
+	void setField(Field data);
 	
 	Field getField(int fieldNo);
 	
@@ -72,5 +72,9 @@ public interface OrbitGUI {
 	boolean isOldGUI();
 	
 	void closeOldGUI();
+	
+	void playVideo(String filename);
+	
+	void stopVideo();
 	
 }

@@ -14,12 +14,13 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import GameData.Field;
 import Utils.AudioPlayer;
 import Utils.EventListener;
 import Utils.FontManager;
+import Utils.MediaPlayer;
 import Utils.MouseController;
 import desktop_resources.GUI;
+import game.Field;
 
 public class OrbitAdapter implements OrbitGUI {
 	
@@ -32,6 +33,7 @@ public class OrbitAdapter implements OrbitGUI {
 	private ImageIcon background;
 	private int[] position = new int[12];
 	private OrbitButton[] button = new OrbitButton[5];
+	private OrbitButton skipbutton;
 	private OrbitOptionList options;
 	private int width;
 	private int height;
@@ -41,6 +43,9 @@ public class OrbitAdapter implements OrbitGUI {
 	private Font descfont;
 	private int lastButtonClick;
 	private OrbitBoard oboard;
+	private MediaPlayer mediaPlayer;
+	private float screendarken = 0f;
+	private float screendarkengoal = 0f;
 	private Field[] board = new Field[40];
 	private int boardsize = 40;
 	private String[] oldPlayerNames = new String[12];
@@ -61,6 +66,7 @@ public class OrbitAdapter implements OrbitGUI {
 				window = new OrbitView();
 				window.setSize(width, height);
 				window.setVisible(true);
+				mediaPlayer = new MediaPlayer(window, skipbutton);
 			}
 		} else {
 			oldButtonVisible[0] = true;
@@ -150,6 +156,23 @@ public class OrbitAdapter implements OrbitGUI {
 		        add(loader = new OrbitLoader(width / 2 - 75, height / 2 - 40, 150, 0));
 		        loader.setVisible(false);
 		        
+		        skipbutton = new OrbitButton(10, height - 80, "SKIP", 0);
+		        skipbutton.setVisible(false);
+		        
+		        skipbutton.onclick.addListener(new EventListener() {
+
+					@Override
+					public void event() {
+						skipbutton.setVisible(false);
+						screendarkengoal = 0f;
+						mediaPlayer.stop();
+					}
+
+					@Override
+					public void event(Object[] args) {}
+		        	
+		        });
+		        
 		        add(button[0] = new OrbitButton(10, height - 120, "ROLL DICE", 1, "dicecup.png"));
 		        add(button[1] = new OrbitButton(10, height - 80, "RESET GAME", 2));
 		        
@@ -160,7 +183,7 @@ public class OrbitAdapter implements OrbitGUI {
 		        add(button[4] = new OrbitButton(10, height - 260, "PLACE HOTEL", 0));
 		        button[4].setVisible(false);
 		        
-		        oboard = new OrbitBoard(width / 2, height / 2, boardsize);
+		        add(oboard = new OrbitBoard(width / 2, height / 2, boardsize));
 		        
 		        for (int i = 0; i < button.length; i++) {
 		        	button[i].setEnabled(false);
@@ -195,6 +218,7 @@ public class OrbitAdapter implements OrbitGUI {
 				
 				for (int i = 0; i < button.length; i++) {
 					if (button[i] != null) {
+						button[i].setEnabled(mediaPlayer == null || !mediaPlayer.isPlaying());
 						button[i].paintComponent(g);
 						if (button[i].hovered) {
 							isHover = true;
@@ -206,6 +230,7 @@ public class OrbitAdapter implements OrbitGUI {
 				loader.angle += 20;
 				loader.angle = loader.angle % 360;
 				
+				options.setEnabled(mediaPlayer == null || !mediaPlayer.isPlaying());
 				options.paintComponent(g);
 				
 				g2d.setFont(font);
@@ -247,10 +272,22 @@ public class OrbitAdapter implements OrbitGUI {
 					isHover = true;
 				}
 				
-				if (isHover) {
-					setCursor(new Cursor(Cursor.HAND_CURSOR));
-				} else {
-					setCursor(Cursor.getDefaultCursor());
+				screendarken += (screendarkengoal - screendarken) * 0.05f;
+				g2d.setColor(new Color(0, 0, 0, screendarken));
+				g2d.fillRect(0, 0, getWidth(), getHeight());
+				
+				if (mediaPlayer == null || mediaPlayer.hasEnded() || !mediaPlayer.isPlaying()) {
+					if (isHover) {
+					 	setCursor(new Cursor(Cursor.HAND_CURSOR));
+					} else {
+						setCursor(Cursor.getDefaultCursor());
+					}
+				}
+				
+				if (mediaPlayer != null && mediaPlayer.hasEnded()) {
+					skipbutton.setVisible(false);
+					screendarkengoal = 0f;
+					mediaPlayer.stop();
 				}
 				
 			}
@@ -423,9 +460,10 @@ public class OrbitAdapter implements OrbitGUI {
 	 * @param data
 	 */
 	@Override
-	public void setField(int fieldNo, Field data) {
-		if (fieldNo >= 0 && fieldNo < boardsize) {
-			board[fieldNo] = data;
+	public void setField(Field data) {
+		if (data.getFieldNo() >= 0 && data.getFieldNo() < boardsize) {
+			oboard.setField(data);
+			board[data.getFieldNo()] = data;
 		}
 	}
 	
@@ -436,10 +474,10 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public Field getField(int fieldNo) {
-		if (fieldNo >= 0 && fieldNo < boardsize && board[fieldNo] != null) {
+		if (fieldNo >= 0 && fieldNo < boardsize) {
 			return board[fieldNo];
 		} else {
-			return new Field();
+			return null;
 		}
 	}
 	
@@ -876,16 +914,46 @@ public class OrbitAdapter implements OrbitGUI {
 			loader.setVisible(visible);
 		}
 	}
-
+	
+	/**
+	 * Detect if we are using the new GUI or old GUI. The name is pretty self-explanatory
+	 */
 	@Override
 	public boolean isOldGUI() {
 		return window == null;
 	}
-
+	
+	/**
+	 * If we are using the old GUI design, close it. If we are using the new GUI design, do nothing
+	 */
 	@Override
 	public void closeOldGUI() {
 		if (window == null) {
 			GUI.close();
+		}
+	}
+	
+	/**
+	 * If we are using the new GUI, play the video clip in the current window. If we are using the old GUI, do nothing
+	 */
+	@Override
+	public void playVideo(String filename) {
+		if (mediaPlayer != null) {
+			screendarkengoal = 1f;
+			mediaPlayer.load(filename);
+			skipbutton.setVisible(true);
+		}
+	}
+	
+	/**
+	 * Stop the currently playing video clip, if one is playing
+	 */
+	@Override
+	public void stopVideo() {
+		if (mediaPlayer != null) {
+			skipbutton.setVisible(false);
+			screendarkengoal = 0f;
+			mediaPlayer.stop();
 		}
 	}
 }

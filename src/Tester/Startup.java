@@ -5,6 +5,7 @@ import java.util.Scanner;
 //import Networking.Matchmaker;
 import Orbit.OrbitAdapter;
 import Utils.AudioPlayer;
+import game.Field;
 
 public class Startup {
 	
@@ -23,10 +24,14 @@ public class Startup {
 			}
 		}
 		sc.close();
-		OrbitAdapter adapter = new OrbitAdapter(1200, 800, 12, !isNew);
+		OrbitAdapter adapter = new OrbitAdapter(1200, 800, 21, !isNew);
 		//Matchmaker matcher = new Matchmaker("", "");
 		
 		//System.out.println(matcher.allUsers());
+		
+		adapter.setField(new Field(2, 200, "Cool spot"));
+		adapter.setField(new Field(3, 5000, "Expensive"));
+		adapter.setField(new Field(12, 0, "Free?"));
 		
 		adapter.setLoaderVisible(true);
 		
@@ -59,9 +64,11 @@ public class Startup {
 		
 		adapter.setScreenText("HELLO WORLD");
 		adapter.setScreenDesc("A very very very\r\nvery very very very very very\nvery very very very very very long description.");
-		
+		adapter.stopVideo();
 		while (true) {
 			if (adapter.clickButton() == 0) {
+				aplay.stop();
+				adapter.playVideo("WantYouGone");
 				adapter.setDieType(true);
 				adapter.setLanguage((int)Math.floor(Math.random() * 2));
 				System.out.println("Rolling dice!");

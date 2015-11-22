@@ -77,7 +77,7 @@ public class OrbitOptionList extends JPanel {
 			
 			boolean isDropdownActive = false;
 			for (int i = 0; i < titles.length; i++) {
-				if (i < types.length && i < options.length && !isDropdownActive) {
+				if (i < types.length && i < options.length && !isDropdownActive && isEnabled()) {
 					boolean active;
 					boolean hover;
 					switch (types[i]) {

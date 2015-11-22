@@ -7,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.io.IOException;
@@ -17,11 +18,11 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
-import GameData.Field;
 import Utils.FontManager;
+import game.Field;
 
 /*
- * OrbitButton class by Andreas, 2015
+ * OrbitBoard class by Andreas and Mickey, 2015
  * 
  * This class is designed to display a round continuous board,
  * with different field data and players.
@@ -46,8 +47,8 @@ public class OrbitBoard extends JPanel {
 	private int y;
 	private int scale = 150;
 	public boolean hovered = false;
-	private Font font;
 	private Font nametag;
+	private Font fieldfont;
 	
 	public OrbitBoard(int x, int y, int size) {
 		this.x = x;
@@ -58,8 +59,8 @@ public class OrbitBoard extends JPanel {
 		playerPos = new int[size];
 		names = new String[size];
 		onboard = new boolean[size];
-		font = new FontManager("ProFontWindows.ttf", 42).get();
 		nametag = new FontManager("ProFontWindows.ttf", 16).get();
+		fieldfont = new FontManager("ProFontWindows.ttf", 20).get();
 	}
 	
 	
@@ -102,8 +103,10 @@ public class OrbitBoard extends JPanel {
 		}
 	}
 	
-	public void setField(int no, Field data) {
-		fields[no] = data;
+	public void setField(Field data) {
+		if (data.getFieldNo() >= 0 && data.getFieldNo() < fields.length) {
+			fields[data.getFieldNo()] = data;
+		}
 	}
 	
 	@Override
@@ -127,8 +130,9 @@ public class OrbitBoard extends JPanel {
         circle.subtract(new Area(ellipse2));
         
         Point point = MouseInfo.getPointerInfo().getLocation();
+        Point loc = getLocationOnScreen();
         
-        hovered = circle.contains(point.x, point.y);
+        hovered = circle.contains(point.x - loc.x, point.y - loc.y);
         
         g2d.fill(circle);
 		
@@ -145,18 +149,6 @@ public class OrbitBoard extends JPanel {
 					(int)(x + scale * 3.0 * Math.cos(((float)i / size) * Math.PI * 2)),
 					(int)(y + scale * 1.5 * Math.sin(((float)i / size) * Math.PI * 2))
 			);
-		}
-		
-		g2d.setFont(font);
-		for (int i = 0; i < size; i++) {
-			if (fields[i] != null) {
-				String text = "implement"; // fields[i].getText();
-				int tx = (int)(x + scale * 2.5 * Math.cos(((i + 0.6f) / size) * Math.PI * 2));
-				int ty = (int)(y + scale * 1.25 * Math.sin(((i + 0.6f) / size) * Math.PI * 2));
-				g2d.drawString(text,
-					tx - (int)font.getStringBounds(text, g2d.getFontRenderContext()).getWidth() / 2,
-					ty);
-			}
 		}
 		
 		int[][] ppos = new int[size][3];
@@ -189,6 +181,25 @@ public class OrbitBoard extends JPanel {
 			
 		});
 		
+		int hoverID = -1;
+		if (hovered) {
+			for (int i = 0; i < size; i++) {
+				Arc2D.Double fieldarc = new Arc2D.Double(x - scale * 3.0, y - scale * 1.5,
+						scale * 6.0, scale * 3.0, 360 - ((float)(i + 1) / size) * 360,
+						(1f / size) * 360, Arc2D.PIE);
+				Area field = new Area(fieldarc);
+				field.intersect(circle);
+				
+				if (field.contains(point.x - loc.x, point.y - loc.y)) {
+					hoverID = i;
+					g2d.setColor(new Color(0, 1, 1, 0.75f));
+					g2d.draw(field);
+					g2d.setColor(new Color(0, 1, 1, 0.125f));
+					g2d.fill(field);
+				}
+			}
+		}
+		
 		g2d.setFont(nametag);
 		for (int j = 0; j < size; j++) {
 			if (ppos[j] != null && players[ppos[j][2]] != null && (ppos[j][0] != 0 || ppos[j][1] != 0)) {
@@ -202,6 +213,25 @@ public class OrbitBoard extends JPanel {
 				g2d.setColor(new Color(35, 185, 185));
 				g2d.drawString(names[i], ppos[j][0] + 50 - (int)nametag.getStringBounds(names[i], g2d.getFontRenderContext()).getWidth() / 2, ppos[j][1] + 10);
 			}
+		}
+		
+		if (hoverID >= 0 && hoverID < fields.length && fields[hoverID] != null) {
+			int dx = (int)(x + scale * 2.5 * Math.cos(((float)(hoverID + 0.5f) / size) * Math.PI * 2));
+			int dy = (int)(y + scale * 1.25 * Math.sin(((float)(hoverID + 0.5f) / size) * Math.PI * 2));
+			g2d.setFont(fieldfont);
+			g2d.setColor(new Color(0, 0, 0, 100));
+			g2d.drawString(fields[hoverID].getName(), dx - (int)fieldfont.getStringBounds(fields[hoverID].getName(),
+					g2d.getFontRenderContext()).getWidth() / 2 + 1, dy - 1);
+			g2d.setFont(nametag);
+			g2d.drawString(fields[hoverID].getValue() + " $", dx - (int)nametag.getStringBounds(fields[hoverID].getValue() + " $",
+					g2d.getFontRenderContext()).getWidth() / 2 + 1, dy + 16);
+			g2d.setFont(fieldfont);
+			g2d.setColor(Color.WHITE);
+			g2d.drawString(fields[hoverID].getName(), dx - (int)fieldfont.getStringBounds(fields[hoverID].getName(),
+					g2d.getFontRenderContext()).getWidth() / 2, dy - 3);
+			g2d.setFont(nametag);
+			g2d.drawString(fields[hoverID].getValue() + " $", dx - (int)nametag.getStringBounds(fields[hoverID].getValue() + " $",
+					g2d.getFontRenderContext()).getWidth() / 2, dy + 14);
 		}
 		
 	}
