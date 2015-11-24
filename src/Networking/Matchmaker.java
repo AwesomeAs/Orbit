@@ -1,5 +1,8 @@
 package Networking;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.Arrays;
 
 import org.json.JSONArray;
@@ -27,11 +30,11 @@ public class Matchmaker {
 	private int allSize = 0;
 	
 	/**
-	 * Set up our class and create a connection to our main channel, provided a publish and subscribe key obtained from https://www.pubnub.com/
-	 * @param publish key
-	 * @param subscribe key
+	 * Internally used to set up the Matchmaking instance, given a pubnub publish and subscribe key.
+	 * @param publish
+	 * @param subscribe
 	 */
-	public Matchmaker(String publish, String subscribe) {
+	private void newMatchmaker(String publish, String subscribe) {
 		pubnub = new Pubnub(publish, subscribe);
 		uuid = pubnub.getUUID();
 		
@@ -140,7 +143,47 @@ public class Matchmaker {
 		} catch (PubnubException e) {
 			e.printStackTrace();
 		}
-		
+	}
+	
+	/**
+	 * Set up our class and create a connection to our main channel, provided a publish and subscribe key obtained from https://www.pubnub.com/
+	 * @param publish key
+	 * @param subscribe key
+	 */
+	public Matchmaker(String publish, String subscribe) {
+		newMatchmaker(publish, subscribe);
+	}
+	
+	/**
+	 * Shortcut for creating a Matchmaker instance given a file containing the publish and subscribe key, like
+	 * line 1 = publish key
+	 * line 2 = subscribe key
+	 * @param file containing publish and subscribe keys
+	 * @throws Exception 
+	 */
+	public Matchmaker(File keyfile) throws Exception {
+		String pub = null;
+		String sub = null;
+		if (keyfile.canRead()) {
+			System.out.println("Can read");
+			try {
+				FileReader fr = new FileReader(keyfile);
+				BufferedReader br = new BufferedReader(fr);
+				System.out.println("Br: " + br);
+				pub = br.readLine();
+				sub = br.readLine();
+				br.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			throw new Exception(keyfile.exists() ? "The specified file is not readable." : "The specified file does not exist.");
+		}
+		if (pub != null && sub != null) {
+			newMatchmaker(pub, sub);
+		} else {
+			throw new Exception("Publish and subscribe keys are not supplied in the key file.");
+		}
 	}
 	
 	/**

@@ -63,8 +63,6 @@ public class OrbitBoard extends JPanel {
 		fieldfont = new FontManager("ProFontWindows.ttf", 20).get();
 	}
 	
-	
-	
 	public void setPlayer(int no, String name) {
 		try {
 			players[no] = new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("images/spaceships/" + no + ".png")));

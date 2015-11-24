@@ -1,8 +1,9 @@
 package Tester;
 
+import java.io.File;
 import java.util.Scanner;
 
-//import Networking.Matchmaker;
+import Networking.Matchmaker;
 import Orbit.OrbitAdapter;
 import Utils.AudioPlayer;
 import game.Field;
@@ -25,7 +26,12 @@ public class Startup {
 		}
 		sc.close();
 		OrbitAdapter adapter = new OrbitAdapter(1200, 800, 21, !isNew);
-		//Matchmaker matcher = new Matchmaker("", "");
+		try {
+			/*Matchmaker matcher =*/ new Matchmaker(new File("resources/matchmaker_keys"));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		//System.out.println(matcher.allUsers());
 		
