@@ -46,7 +46,7 @@ public class MediaPlayer {
 						"}</script></head><html style=\"background-color:black\">" +
 						"<body style=\"padding:0; margin:0; width:100%; height:100%; overflow:hidden; " +
 						"background-color:black\"><video style=\"width:100%; height:100%\" id=\"video\" autoplay " +
-						"preload=\"auto\" ended=\"onend()\"><source src=\"" + getClass().getClassLoader().getResource("media/" +
+						"preload=\"auto\" onended=\"onend()\"><source src=\"" + getClass().getClassLoader().getResource("media/" +
 						filename + ".mp4").toExternalForm() + "\" type=\"video/mp4\"></video></body></html>");
 				borderPane.setCenter(webComponent);
 				Scene scene = new Scene(borderPane, window.getWidth(), window.getHeight());
@@ -70,7 +70,6 @@ public class MediaPlayer {
 	public boolean hasEnded() {
 		if (engine != null && webPanel.getScene() != null) {
 			if (engine.getTitle() != null && engine.getTitle().equals("ended")) {
-				stop();
 				return true;
 			} else {
 				return false;

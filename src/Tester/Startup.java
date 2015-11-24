@@ -30,7 +30,7 @@ public class Startup {
 		//System.out.println(matcher.allUsers());
 		
 		adapter.setField(new Field(2, 200, "Cool spot"));
-		adapter.setField(new Field(3, 5000, "Expensive"));
+		adapter.setField(new Field(6, 5000, "Expensive"));
 		adapter.setField(new Field(12, 0, "Free?"));
 		
 		adapter.setLoaderVisible(true);
@@ -69,13 +69,14 @@ public class Startup {
 			if (adapter.clickButton() == 0) {
 				aplay.stop();
 				adapter.playVideo("WantYouGone");
+				//adapter.moveMouse(1195, 5, true);
 				adapter.setDieType(true);
 				adapter.setLanguage((int)Math.floor(Math.random() * 2));
 				System.out.println("Rolling dice!");
 				System.out.println(adapter.getField(45));
 			} else {
 				System.out.println("Hit reset game");
-				//adapter.closeOldGUI();
+				adapter.closeOldGUI();
 			}
 		}
 		

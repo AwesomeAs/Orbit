@@ -461,9 +461,15 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public void setField(Field data) {
-		if (data.getFieldNo() >= 0 && data.getFieldNo() < boardsize) {
-			oboard.setField(data);
-			board[data.getFieldNo()] = data;
+		if (window != null) {
+			if (data.getFieldNo() >= 0 && data.getFieldNo() < boardsize) {
+				oboard.setField(data);
+				board[data.getFieldNo()] = data;
+			}
+		} else {
+			GUI.setTitleText(data.getFieldNo(), data.getName());
+			GUI.setSubText(data.getFieldNo(), data.getValue() + " $");
+			GUI.setDescriptionText(data.getFieldNo(), data.getName());
 		}
 	}
 	
@@ -630,6 +636,9 @@ public class OrbitAdapter implements OrbitGUI {
 	@Override
 	public void setScreenText(String text) {
 		screentext = text;
+		if (window == null) {
+			GUI.showMessage(text);
+		}
 	}
 	
 	/**
@@ -718,7 +727,7 @@ public class OrbitAdapter implements OrbitGUI {
 				size++;
 			}
 			// if append to array if button 2, 3 or 4 is visible!
-			String result = GUI.getUserButtonPressed("Choose action", buttons);
+			String result = GUI.getUserButtonPressed("Vælg handling", buttons);
 			switch (result) {
 				case "Kast terninger":
 					return 0;
@@ -930,6 +939,7 @@ public class OrbitAdapter implements OrbitGUI {
 	public void closeOldGUI() {
 		if (window == null) {
 			GUI.close();
+			System.exit(0);
 		}
 	}
 	
