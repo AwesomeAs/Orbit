@@ -2,12 +2,15 @@ package Orbit;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -456,7 +459,6 @@ public class OrbitAdapter implements OrbitGUI {
 	
 	/**
 	 * Sets field data to a given field on the monopoly board.
-	 * @param fieldNo
 	 * @param data
 	 */
 	@Override
@@ -952,6 +954,11 @@ public class OrbitAdapter implements OrbitGUI {
 			screendarkengoal = 1f;
 			mediaPlayer.load(filename);
 			skipbutton.setVisible(true);
+		} else {
+			try {
+				Desktop.getDesktop().open(new File(getClass().getClassLoader().getResource("media/" +
+							filename + ".mp4").getPath()));
+			} catch (IOException e) {}
 		}
 	}
 	
@@ -965,5 +972,25 @@ public class OrbitAdapter implements OrbitGUI {
 			screendarkengoal = 0f;
 			mediaPlayer.stop();
 		}
+	}
+	
+	/**
+	 * Checks if our current view is a video
+	 */
+	@Override
+	public boolean isVideoPlaying() {
+		return mediaPlayer != null && mediaPlayer.isPlaying();
+	}
+	
+	/**
+	 * Yields the current thread until the current view is no longer a video
+	 */
+	@Override
+	public void waitForVideoEnded() {
+		try {
+			while (mediaPlayer != null && screendarkengoal == 1f) {
+					Thread.sleep(100);
+			}
+		} catch (InterruptedException e) {}
 	}
 }

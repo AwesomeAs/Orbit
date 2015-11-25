@@ -72,4 +72,6 @@ public class Field {
 		else 
 			return this.available;
 	}
+	
+	//public abstract void landOnField(Player player);
 }

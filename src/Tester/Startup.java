@@ -7,6 +7,7 @@ import Networking.Matchmaker;
 import Orbit.OrbitAdapter;
 import Utils.AudioPlayer;
 import game.Field;
+//import game.Field;
 
 public class Startup {
 	
@@ -75,6 +76,8 @@ public class Startup {
 			if (adapter.clickButton() == 0) {
 				aplay.stop();
 				adapter.playVideo("WantYouGone");
+				adapter.waitForVideoEnded();
+				System.out.println("Video stopped!");
 				//adapter.moveMouse(1195, 5, true);
 				adapter.setDieType(true);
 				adapter.setLanguage((int)Math.floor(Math.random() * 2));

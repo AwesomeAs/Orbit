@@ -77,4 +77,8 @@ public interface OrbitGUI {
 	
 	void stopVideo();
 	
+	boolean isVideoPlaying();
+	
+	void waitForVideoEnded();
+	
 }
