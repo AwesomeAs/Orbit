@@ -57,7 +57,7 @@ public class OrbitAdapter implements OrbitGUI {
 	private int[] oldPlayerScore = new int[12];
 	private boolean[] oldButtonVisible = new boolean[5];
 	
-	public OrbitAdapter(int width, int height, int boardsize, boolean useOldGUI) {
+	public OrbitAdapter(int width, int height, int boardsize, boolean useOldGUI, String[] boardicons) {
 		if (!useOldGUI) {
 			if (window == null) {
 				this.width = width;
@@ -74,11 +74,72 @@ public class OrbitAdapter implements OrbitGUI {
 		} else {
 			oldButtonVisible[0] = true;
 	        oldButtonVisible[1] = true;
+	        desktop_fields.Field[] fields = new desktop_fields.Field[boardsize];
+	        for (int i = 0; i < boardsize; i++) {
+	        	if (i < boardicons.length && boardicons[i] != null) {
+	        		switch (boardicons[i]) {
+	        			case "Brewery":
+	        				fields[i] = new desktop_fields.Brewery.Builder().build();
+	        				break;
+	        			case "Chance":
+	        				fields[i] = new desktop_fields.Chance.Builder().build();
+	        				fields[i].getPanel().setBorder(
+	        						BorderFactory.createLineBorder(new Color(140, 140, 140)));
+	        				break;
+						case "Jail":
+							fields[i] = new desktop_fields.Jail.Builder().build();
+							fields[i].getPanel().setBorder(
+	        						BorderFactory.createLineBorder(new Color(120, 120, 120)));
+							break;
+						case "Refuge":
+	        				fields[i] = new desktop_fields.Refuge.Builder().build();
+	        				fields[i].getPanel().setBorder(
+	        						BorderFactory.createLineBorder(new Color(150, 150, 150)));
+	        				break;
+						case "Shipping":
+	        				fields[i] = new desktop_fields.Shipping.Builder().build();
+	        				fields[i].getPanel().setBorder(
+	        						BorderFactory.createLineBorder(new Color(150, 150, 150)));
+	        				break;
+						case "Start":
+							fields[i] = new desktop_fields.Start.Builder().build();
+							fields[i].getPanel().setBorder(
+	        						BorderFactory.createLineBorder(Color.getHSBColor(i * 0.18f, 0.75f, 0.8f)));
+	        				break;
+						case "Street":
+							fields[i] = new desktop_fields.Street.Builder().build();
+							fields[i].getPanel().setBorder(
+	        						BorderFactory.createLineBorder(Color.getHSBColor(i * 0.18f, 0.75f, 0.8f)));
+	        				break;
+						case "Tax":
+							fields[i] = new desktop_fields.Tax.Builder().build();
+							fields[i].getPanel().setBorder(
+	        						BorderFactory.createLineBorder(new Color(100, 100, 100)));
+	        				break;
+	        			default:
+	        				fields[i] = new desktop_fields.Empty.Builder()
+	        				.setBgColor(Color.getHSBColor(i * 0.18f, 0.75f, 1f)).build();
+	        				fields[i].getPanel().setBorder(
+	        						BorderFactory.createLineBorder(Color.getHSBColor(i * 0.18f, 0.75f, 0.8f)));
+	        		}
+	        	} else {
+	        		fields[i] = new desktop_fields.Street.Builder()
+	        				.setBgColor(Color.getHSBColor(i * 0.18f, 0.75f, 1f)).build();
+	        		fields[i].getPanel().setBorder(BorderFactory.createLineBorder(Color.getHSBColor(i * 0.18f, 0.75f, 0.8f)));
+	        	}
+	        }
+	        GUI.create(fields);
+	        GUI.setSubText(1, "$$$");
+	        GUI.setDescriptionText(1, "Much cash such wow");
 		}
 	}
 	
+	public OrbitAdapter(int width, int height, int boardsize, boolean useOldGUI) {
+		this(width, height, boardsize, useOldGUI, new String[boardsize]);
+	}
+	
 	public OrbitAdapter(int width, int height) {
-		this(width, height, 40, false);
+		this(width, height, 40, false, new String[40]);
 	}
 	
 	private class OrbitView extends JFrame {
@@ -469,9 +530,10 @@ public class OrbitAdapter implements OrbitGUI {
 				board[data.getFieldNo()] = data;
 			}
 		} else {
-			GUI.setTitleText(data.getFieldNo(), data.getName());
-			GUI.setSubText(data.getFieldNo(), data.getValue() + " $");
-			GUI.setDescriptionText(data.getFieldNo(), data.getName());
+			System.out.println("Setting field: " + data.getFieldNo());
+			GUI.setTitleText(data.getFieldNo() + 1, data.getName());
+			GUI.setSubText(data.getFieldNo() + 1, data.getValue() + " $");
+			GUI.setDescriptionText(data.getFieldNo() + 1, data.getName());
 		}
 	}
 	

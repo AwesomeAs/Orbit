@@ -26,7 +26,19 @@ public class Startup {
 			}
 		}
 		sc.close();
-		OrbitAdapter adapter = new OrbitAdapter(1200, 800, 21, !isNew);
+		OrbitAdapter adapter = new OrbitAdapter(1200, 800, 21, !isNew, new String[]{
+				"Start",
+				null,
+				"Brewery",
+				"Shipping",
+				null,
+				null,
+				null,
+				"Refuge",
+				"Chance",
+				"Jail",
+				"Tax"
+		});
 		try {
 			/*Matchmaker matcher =*/ new Matchmaker(new File("resources/matchmaker_keys"));
 		} catch (Exception e) {

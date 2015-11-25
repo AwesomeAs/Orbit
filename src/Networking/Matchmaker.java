@@ -165,11 +165,9 @@ public class Matchmaker {
 		String pub = null;
 		String sub = null;
 		if (keyfile.canRead()) {
-			System.out.println("Can read");
 			try {
 				FileReader fr = new FileReader(keyfile);
 				BufferedReader br = new BufferedReader(fr);
-				System.out.println("Br: " + br);
 				pub = br.readLine();
 				sub = br.readLine();
 				br.close();
