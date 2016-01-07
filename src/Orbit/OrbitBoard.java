@@ -19,7 +19,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 import Utils.FontManager;
-import game.Field;
+import game.*;
 
 /*
  * OrbitBoard class by Andreas and Mickey, 2015
@@ -102,8 +102,8 @@ public class OrbitBoard extends JPanel {
 	}
 	
 	public void setField(Field data) {
-		if (data.getFieldNo() >= 0 && data.getFieldNo() < fields.length) {
-			fields[data.getFieldNo()] = data;
+		if (data.getNumber() >= 0 && data.getNumber() < fields.length) {
+			fields[data.getNumber()] = data;
 		}
 	}
 	
@@ -220,15 +220,40 @@ public class OrbitBoard extends JPanel {
 			g2d.setColor(new Color(0, 0, 0, 100));
 			g2d.drawString(fields[hoverID].getName(), dx - (int)fieldfont.getStringBounds(fields[hoverID].getName(),
 					g2d.getFontRenderContext()).getWidth() / 2 + 1, dy - 1);
-			g2d.setFont(nametag);
-			g2d.drawString(fields[hoverID].getValue() + " $", dx - (int)nametag.getStringBounds(fields[hoverID].getValue() + " $",
-					g2d.getFontRenderContext()).getWidth() / 2 + 1, dy + 16);
-			g2d.setFont(fieldfont);
 			g2d.setColor(Color.WHITE);
 			g2d.drawString(fields[hoverID].getName(), dx - (int)fieldfont.getStringBounds(fields[hoverID].getName(),
 					g2d.getFontRenderContext()).getWidth() / 2, dy - 3);
+			
+			String desc = null;
+			if (fields[hoverID] instanceof Ownable) {
+				if (((Ownable)fields[hoverID]).getOwner() != null) {
+					if (fields[hoverID] instanceof Fleet) {
+						desc = ((Ownable)fields[hoverID]).getOwner().getName() + ", " +
+								((Fleet)fields[hoverID]).getRent();
+					} else if (fields[hoverID] instanceof LaborCamp) {
+						desc = ((Ownable)fields[hoverID]).getOwner().getName() + ", " +
+								((LaborCamp)fields[hoverID]).getRent();
+					} else if (fields[hoverID] instanceof Territory) {
+						desc = ((Ownable)fields[hoverID]).getOwner().getName() + ", " +
+								((Territory)fields[hoverID]).getRent();
+					}
+				} else {
+					desc = ((Ownable)fields[hoverID]).getPrice() + " $";
+				}
+			} else {
+				if (fields[hoverID] instanceof Tax) {
+					desc = "-10% or " + ((Tax)fields[hoverID]).getTax() + " $";
+				} else {
+					desc = "+" + ((Refuge)fields[hoverID]).getBonus() + " $";
+				}
+			}
+			
 			g2d.setFont(nametag);
-			g2d.drawString(fields[hoverID].getValue() + " $", dx - (int)nametag.getStringBounds(fields[hoverID].getValue() + " $",
+			g2d.setColor(new Color(0, 0, 0, 100));
+			g2d.drawString(desc, dx - (int)nametag.getStringBounds(desc,
+					g2d.getFontRenderContext()).getWidth() / 2 + 1, dy + 16);
+			g2d.setColor(Color.WHITE);
+			g2d.drawString(desc, dx - (int)nametag.getStringBounds(desc,
 					g2d.getFontRenderContext()).getWidth() / 2, dy + 14);
 		}
 		

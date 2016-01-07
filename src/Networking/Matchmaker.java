@@ -161,9 +161,10 @@ public class Matchmaker {
 	 * @param file containing publish and subscribe keys
 	 * @throws Exception 
 	 */
-	public Matchmaker(File keyfile) throws Exception {
+	public Matchmaker(String keyfilepath) throws Exception {
 		String pub = null;
 		String sub = null;
+		File keyfile = new File(getClass().getClassLoader().getResource(keyfilepath).getPath());
 		if (keyfile.canRead()) {
 			try {
 				FileReader fr = new FileReader(keyfile);

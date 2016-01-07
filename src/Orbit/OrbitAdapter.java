@@ -2,20 +2,18 @@ package Orbit;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.*;
-import java.io.File;
-import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 
 import Utils.AudioPlayer;
 import Utils.EventListener;
@@ -23,7 +21,7 @@ import Utils.FontManager;
 import Utils.MediaPlayer;
 import Utils.MouseController;
 import desktop_resources.GUI;
-import game.Field;
+import game.*;
 
 public class OrbitAdapter implements OrbitGUI {
 	
@@ -47,6 +45,7 @@ public class OrbitAdapter implements OrbitGUI {
 	private int lastButtonClick;
 	private OrbitBoard oboard;
 	private MediaPlayer mediaPlayer;
+	private JFrame twindow;
 	private float screendarken = 0f;
 	private float screendarkengoal = 0f;
 	private Field[] board = new Field[40];
@@ -525,15 +524,38 @@ public class OrbitAdapter implements OrbitGUI {
 	@Override
 	public void setField(Field data) {
 		if (window != null) {
-			if (data.getFieldNo() >= 0 && data.getFieldNo() < boardsize) {
+			if (data.getNumber() >= 0 && data.getNumber() < boardsize) {
 				oboard.setField(data);
-				board[data.getFieldNo()] = data;
+				board[data.getNumber()] = data;
 			}
 		} else {
-			System.out.println("Setting field: " + data.getFieldNo());
-			GUI.setTitleText(data.getFieldNo() + 1, data.getName());
-			GUI.setSubText(data.getFieldNo() + 1, data.getValue() + " $");
-			GUI.setDescriptionText(data.getFieldNo() + 1, data.getName());
+			String desc = null;
+			if (data instanceof Ownable) {
+				if (((Ownable)data).getOwner() != null) {
+					if (data instanceof Fleet) {
+						desc = ((Ownable)data).getOwner().getName() + ", " +
+								((Fleet)data).getRent();
+					} else if (data instanceof LaborCamp) {
+						desc = ((Ownable)data).getOwner().getName() + ", " +
+								((LaborCamp)data).getRent();
+					} else if (data instanceof Territory) {
+						desc = ((Ownable)data).getOwner().getName() + ", " +
+								((Territory)data).getRent();
+					}
+				} else {
+					desc = ((Ownable)data).getPrice() + " $";
+				}
+			} else {
+				if (data instanceof Tax) {
+						desc = "-10% or " + ((Tax)data).getTax() + " $";
+				} else {
+					desc = "+" + ((Refuge)data).getBonus() + " $";
+				}
+			}
+			//System.out.println("Setting field: " + data.getNumber());
+			GUI.setTitleText(data.getNumber() + 1, data.getName());
+			GUI.setSubText(data.getNumber() + 1, desc);
+			GUI.setDescriptionText(data.getNumber() + 1, data.getName());
 		}
 	}
 	
@@ -917,6 +939,16 @@ public class OrbitAdapter implements OrbitGUI {
 	}
 	
 	/**
+	 * Sets if the visual widget for game setting should be visible.
+	 */
+	@Override
+	public void setOptionsVisible(boolean visible) {
+		if (window != null) {
+			options.setVisible(visible);
+		}
+	}
+	
+	/**
 	 * Sets the title and placeholder for all players' textfields.
 	 */
 	@Override
@@ -1017,10 +1049,13 @@ public class OrbitAdapter implements OrbitGUI {
 			mediaPlayer.load(filename);
 			skipbutton.setVisible(true);
 		} else {
-			try {
-				Desktop.getDesktop().open(new File(getClass().getClassLoader().getResource("media/" +
-							filename + ".mp4").getPath()));
-			} catch (IOException e) {}
+			screendarkengoal = 1f;
+			twindow = new JFrame();
+			twindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+			twindow.setExtendedState(JFrame.MAXIMIZED_BOTH);
+			twindow.setVisible(true);
+			mediaPlayer = new MediaPlayer(twindow);
+			mediaPlayer.load(filename);
 		}
 	}
 	
@@ -1033,6 +1068,10 @@ public class OrbitAdapter implements OrbitGUI {
 			skipbutton.setVisible(false);
 			screendarkengoal = 0f;
 			mediaPlayer.stop();
+			if (twindow != null) {
+				twindow.dispose();
+				twindow = null;
+			}
 		}
 	}
 	
@@ -1041,7 +1080,7 @@ public class OrbitAdapter implements OrbitGUI {
 	 */
 	@Override
 	public boolean isVideoPlaying() {
-		return mediaPlayer != null && mediaPlayer.isPlaying();
+		return (mediaPlayer != null && mediaPlayer.isPlaying()) || (twindow != null && screendarkengoal == 1f);
 	}
 	
 	/**
@@ -1050,7 +1089,7 @@ public class OrbitAdapter implements OrbitGUI {
 	@Override
 	public void waitForVideoEnded() {
 		try {
-			while (mediaPlayer != null && screendarkengoal == 1f) {
+			while ((mediaPlayer != null || twindow != null) && screendarkengoal == 1f) {
 					Thread.sleep(100);
 			}
 		} catch (InterruptedException e) {}

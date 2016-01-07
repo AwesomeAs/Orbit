@@ -1,13 +1,11 @@
 package Tester;
 
-import java.io.File;
 import java.util.Scanner;
 
 import Networking.Matchmaker;
 import Orbit.OrbitAdapter;
 import Utils.AudioPlayer;
-import game.Field;
-//import game.Field;
+import game.*;
 
 public class Startup {
 	
@@ -40,7 +38,7 @@ public class Startup {
 				"Tax"
 		});
 		try {
-			/*Matchmaker matcher =*/ new Matchmaker(new File("resources/matchmaker_keys"));
+			/*Matchmaker matcher =*/ new Matchmaker("matchmaker_keys");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -48,13 +46,16 @@ public class Startup {
 		
 		//System.out.println(matcher.allUsers());
 		
-		adapter.setField(new Field(2, 200, "Cool spot"));
-		adapter.setField(new Field(6, 5000, "Expensive"));
-		adapter.setField(new Field(12, 0, "Free?"));
+		adapter.setField(new Fleet("Cool spot", 2, 200));
+		adapter.setField(new Refuge("Expensive", 6, 5000));
+		adapter.setField(new LaborCamp("Free?", 12, 0, 5));
 		
 		adapter.setLoaderVisible(true);
 		
 		//matcher.clearCallback("talk");
+		
+		AudioPlayer aplay = adapter.getAudio("bgmusic.wav");
+		aplay.play(true);
 		
 		adapter.setPlayer(0, "");
 		adapter.setPlayer(1, "");
@@ -67,9 +68,6 @@ public class Startup {
 		
 		adapter.addLanguage("English");
 		adapter.addLanguage("Danish");
-		
-		AudioPlayer aplay = adapter.getAudio("bgmusic.wav");
-		aplay.play(true);
 		
 		System.out.println(adapter.readPlayerName(0));
 		System.out.println(adapter.getPlayerScore(0));
@@ -89,6 +87,7 @@ public class Startup {
 				aplay.stop();
 				adapter.playVideo("WantYouGone");
 				adapter.waitForVideoEnded();
+				aplay.play(true);
 				System.out.println("Video stopped!");
 				//adapter.moveMouse(1195, 5, true);
 				adapter.setDieType(true);

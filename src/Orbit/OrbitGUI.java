@@ -57,6 +57,8 @@ public interface OrbitGUI {
 	
 	void setLanguage(int optionNo);
 	
+	void setOptionsVisible(boolean visible);
+	
 	void setPlayerLanguage(String title, String placeholder);
 	
 	void setOptionLanguage(int optionNo, String title);

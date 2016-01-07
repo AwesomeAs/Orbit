@@ -41,6 +41,7 @@ public class MediaPlayer {
 				webComponent = new WebView();
 				engine = webComponent.getEngine();
 				engine.setJavaScriptEnabled(true);
+				System.out.println(getClass().getClassLoader().getResource("media/" + filename + ".mp4").toExternalForm());
 				engine.loadContent("<!DOCTYPE html><head><title id=\"title\">running</title><script " +
 				"type=\"text/javascript\">function onend() { document.getElementById('title').innerHTML = \"ended\"; " +
 						"}</script></head><html style=\"background-color:black\">" +

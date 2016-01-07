@@ -257,181 +257,187 @@ public class OrbitOptionList extends JPanel {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		Graphics2D g2d = (Graphics2D) g;
-		
-		Point point = MouseInfo.getPointerInfo().getLocation();
-		Point loc = getLocationOnScreen();
-		
-		hovered = false;
-		hoverTitle = "";
-		if (visible) {
-			for (int i = 0; i < titles.length; i++) {
-				if (i < types.length && i < options.length) {
-					g2d.setColor(new Color(0, 0, 0, 200));
-					g2d.fillRect(x, y + i * 45, w, 35);
-					g2d.setPaint(
-							new GradientPaint(x, y, new Color(30, 145, 140, 75),
-									x + w, y, new Color(35, 185, 185, 30)));
-					g2d.fillRect(x, y + i * 45, w, 35);
-					g2d.setPaint(
-							new GradientPaint(x, y, new Color(35, 185, 185, 100), x + w, y, new Color(35, 185, 185, 50)));
-					g2d.drawLine(x, y + i * 45 + 35, x + w, y + i * 45 + 35);
-					g2d.setColor(new Color(40, 225, 220));
-					g2d.setFont(font);
-					g2d.drawString(titles[i], x + 7, y + i * 45 + 22);
-					
-					g2d.setStroke(new BasicStroke(1.2f));
-					boolean active;
-					boolean hover;
-					switch (types[i]) {
-						case 1:
-							active = options[i][0] == "1";
-							hover = Math.sqrt(
-									Math.pow(point.x - loc.x - (x + w - 17), 2.) +
-									Math.pow(point.y - loc.y - (y + i * 45 + 18), 2.)) <= 9 ||
-									Math.sqrt(
-									Math.pow(point.x - loc.x - (x + w - 27), 2.) +
-									Math.pow(point.y - loc.y - (y + i * 45 + 18), 2.)) <= 9 ||
-									(point.x - loc.x >= x + w - 27 && point.x - loc.x <= x + w - 17 &&
-									point.y - loc.y >= y + i * 45 + 9 && point.y - loc.y <= y + i * 45 + 27);
-							hovered = hovered || hover;
-							if (hover) {
-								hoverTitle = titles[i];
-								if (lastHover != i) {
-									onhover.fire(i);
-								}
-								lastHover = i;
-							}
-							hoverf[i] += ((active ? 1 : 0) - hoverf[i]) * 0.2;
-							g2d.setPaint(new GradientPaint(
-								x, y + i * 45, new Color(
-									(int)(30 * hoverf[i]),
-									(int)(160 * hoverf[i]),
-									(int)(100 * hoverf[i]),
-									100),
-								x, y + i * 45 + 35, new Color(
-									(int)(60 * hoverf[i]),
-									(int)(200 * hoverf[i]),
-									(int)(90 * hoverf[i]),
-									(int)(100 + 50 * hoverf[i]))));
-							g2d.fillRoundRect(x + w - 33, y + i * 45 + 10, 25, 15, 15, 15);
-							g2d.setColor(new Color(
-									35 + (int)(65 * hoverf[i]),
-									185 + (int)(45 * hoverf[i]),
-									185 - (int)(65 * hoverf[i]),
-									150 + (int)(50 * hoverf[i])));
-							g2d.drawRoundRect(x + w - 35, y + i * 45 + 8, 28, 18, 18, 18);
-							g2d.setColor(new Color(0, 0, 0, 100));
-							g2d.fillArc(x + w - (34 - (int)(hoverf[i] * 11)), y + i * 45 + 9, 17, 17, 0, 360);
-							g2d.setColor(new Color(
-									35 + (int)(65 * hoverf[i]),
-									185 + (int)(45 * hoverf[i]),
-									185 - (int)(65 * hoverf[i]),
-									100 + (int)(155 * hoverf[i])));
-							g2d.fillArc(x + w - (33 - (int)(hoverf[i] * 11)), y + i * 45 + 10, 15, 15, 0, 360);
-							break;
-						case 2:
-							if (options[i].length > 1) {
-								g2d.setColor(new Color(40, 225, 220, 200));
-								g2d.drawString(options[i][0], x + w - textWidth(options[i][0], g2d) - 25, y + i * 45 + 21);
-								g2d.setStroke(new BasicStroke(2));
-								active = options[i][1] == "1";
-								if (active) {
-									g2d.drawLine(x + w - 15, y + i * 45 + 19, x + w - 11, y + i * 45 + 15);
-									g2d.drawLine(x + w - 19, y + i * 45 + 15, x + w - 15, y + i * 45 + 19);
-								} else {
-									g2d.drawLine(x + w - 16, y + i * 45 + 13, x + w - 12, y + i * 45 + 17);
-									g2d.drawLine(x + w - 16, y + i * 45 + 21, x + w - 12, y + i * 45 + 17);
-								}
-								hover = point.x - loc.x >= x + w / 2 &&
-										point.x - loc.x <= x + w && point.y - loc.y >= y + i * 45 &&
-										point.y - loc.y <= y + i * 45 + 35;
+		if (visible && isVisible()) {
+			Graphics2D g2d = (Graphics2D) g;
+			
+			Point point = MouseInfo.getPointerInfo().getLocation();
+			Point loc = getLocationOnScreen();
+			
+			hovered = false;
+			hoverTitle = "";
+			if (visible) {
+				for (int i = 0; i < titles.length; i++) {
+					if (i < types.length && i < options.length) {
+						g2d.setColor(new Color(0, 0, 0, 200));
+						g2d.fillRect(x, y + i * 45, w, 35);
+						g2d.setPaint(
+								new GradientPaint(x, y, new Color(30, 145, 140, 75),
+										x + w, y, new Color(35, 185, 185, 30)));
+						g2d.fillRect(x, y + i * 45, w, 35);
+						g2d.setPaint(
+								new GradientPaint(x, y, new Color(35, 185, 185, 100), x + w, y, new Color(35, 185, 185, 50)));
+						g2d.drawLine(x, y + i * 45 + 35, x + w, y + i * 45 + 35);
+						g2d.setColor(new Color(40, 225, 220));
+						g2d.setFont(font);
+						g2d.drawString(titles[i], x + 7, y + i * 45 + 22);
+						
+						g2d.setStroke(new BasicStroke(1.2f));
+						boolean active;
+						boolean hover;
+						switch (types[i]) {
+							case 1:
+								active = options[i][0] == "1";
+								hover = Math.sqrt(
+										Math.pow(point.x - loc.x - (x + w - 17), 2.) +
+										Math.pow(point.y - loc.y - (y + i * 45 + 18), 2.)) <= 9 ||
+										Math.sqrt(
+										Math.pow(point.x - loc.x - (x + w - 27), 2.) +
+										Math.pow(point.y - loc.y - (y + i * 45 + 18), 2.)) <= 9 ||
+										(point.x - loc.x >= x + w - 27 && point.x - loc.x <= x + w - 17 &&
+										point.y - loc.y >= y + i * 45 + 9 && point.y - loc.y <= y + i * 45 + 27);
 								hovered = hovered || hover;
+								if (hover) {
+									hoverTitle = titles[i];
+									if (lastHover != i) {
+										onhover.fire(i);
+									}
+									lastHover = i;
+								}
+								hoverf[i] += ((active ? 1 : 0) - hoverf[i]) * 0.2;
+								g2d.setPaint(new GradientPaint(
+									x, y + i * 45, new Color(
+										(int)(30 * hoverf[i]),
+										(int)(160 * hoverf[i]),
+										(int)(100 * hoverf[i]),
+										100),
+									x, y + i * 45 + 35, new Color(
+										(int)(60 * hoverf[i]),
+										(int)(200 * hoverf[i]),
+										(int)(90 * hoverf[i]),
+										(int)(100 + 50 * hoverf[i]))));
+								g2d.fillRoundRect(x + w - 33, y + i * 45 + 10, 25, 15, 15, 15);
+								g2d.setColor(new Color(
+										35 + (int)(65 * hoverf[i]),
+										185 + (int)(45 * hoverf[i]),
+										185 - (int)(65 * hoverf[i]),
+										150 + (int)(50 * hoverf[i])));
+								g2d.drawRoundRect(x + w - 35, y + i * 45 + 8, 28, 18, 18, 18);
+								g2d.setColor(new Color(0, 0, 0, 100));
+								g2d.fillArc(x + w - (34 - (int)(hoverf[i] * 11)), y + i * 45 + 9, 17, 17, 0, 360);
+								g2d.setColor(new Color(
+										35 + (int)(65 * hoverf[i]),
+										185 + (int)(45 * hoverf[i]),
+										185 - (int)(65 * hoverf[i]),
+										100 + (int)(155 * hoverf[i])));
+								g2d.fillArc(x + w - (33 - (int)(hoverf[i] * 11)), y + i * 45 + 10, 15, 15, 0, 360);
+								break;
+							case 2:
+								if (options[i].length > 1) {
+									g2d.setColor(new Color(40, 225, 220, 200));
+									g2d.drawString(options[i][0], x + w - textWidth(options[i][0], g2d) - 25, y + i * 45 + 21);
+									g2d.setStroke(new BasicStroke(2));
+									active = options[i][1] == "1";
+									if (active) {
+										g2d.drawLine(x + w - 15, y + i * 45 + 19, x + w - 11, y + i * 45 + 15);
+										g2d.drawLine(x + w - 19, y + i * 45 + 15, x + w - 15, y + i * 45 + 19);
+									} else {
+										g2d.drawLine(x + w - 16, y + i * 45 + 13, x + w - 12, y + i * 45 + 17);
+										g2d.drawLine(x + w - 16, y + i * 45 + 21, x + w - 12, y + i * 45 + 17);
+									}
+									hover = point.x - loc.x >= x + w / 2 &&
+											point.x - loc.x <= x + w && point.y - loc.y >= y + i * 45 &&
+											point.y - loc.y <= y + i * 45 + 35;
+									hovered = hovered || hover;
+									if (hover) {
+										if (lastHover != i) {
+											onhover.fire(i);
+										}
+										lastHover = i;
+									}
+								} else {
+									g2d.setColor(new Color(40, 225, 220, 100));
+									g2d.drawString(options[i][0], x + w - textWidth(options[i][0], g2d) - 25, y + i * 45 + 21);
+								}
+								break;
+							default:
+								active = options[i][0] == "1";
+								hover = Math.sqrt(
+										Math.pow(point.x - loc.x - (x + w - 17), 2.) +
+										Math.pow(point.y - loc.y - (y + i * 45 + 18), 2.)) <= 9;
+								hovered = hovered || hover;
+								if (hovered) hoverTitle = titles[i];
+								hoverf[i] += ((active ? 1 : 0) - hoverf[i]) * 0.2;
+								g2d.setPaint(new GradientPaint(
+									x, y + i * 45, new Color(
+										(int)(30 * hoverf[i]),
+										(int)(160 * hoverf[i]),
+										(int)(100 * hoverf[i]),
+										100),
+									x, y + i * 45 + 35, new Color(
+										(int)(60 * hoverf[i]),
+										(int)(200 * hoverf[i]),
+										(int)(90 * hoverf[i]),
+										(int)(100 + 50 * hoverf[i]))));
+								g2d.fillArc(x + w - 23, y + i * 45 + 11, 15, 15, 0, 360);
+								g2d.setColor(new Color(
+										35 + (int)(65 * hoverf[i]),
+										185 + (int)(45 * hoverf[i]),
+										185 - (int)(65 * hoverf[i]),
+										150 + (int)(50 * hoverf[i])));
+								g2d.drawArc(x + w - 25, y + i * 45 + 9, 18, 18, 0, 360);
+								g2d.setStroke(new BasicStroke(2));
+								if (active) {
+									g2d.drawLine(x + w - 13, y + i * 45 + 16, x + w - 18, y + i * 45 + 21);
+									g2d.drawLine(x + w - 18, y + i * 45 + 21, x + w - 20, y + i * 45 + 19);
+								}
+								g2d.setStroke(new BasicStroke(1));
 								if (hover) {
 									if (lastHover != i) {
 										onhover.fire(i);
 									}
 									lastHover = i;
 								}
-							} else {
-								g2d.setColor(new Color(40, 225, 220, 100));
-								g2d.drawString(options[i][0], x + w - textWidth(options[i][0], g2d) - 25, y + i * 45 + 21);
-							}
-							break;
-						default:
-							active = options[i][0] == "1";
-							hover = Math.sqrt(
-									Math.pow(point.x - loc.x - (x + w - 17), 2.) +
-									Math.pow(point.y - loc.y - (y + i * 45 + 18), 2.)) <= 9;
-							hovered = hovered || hover;
-							if (hovered) hoverTitle = titles[i];
-							hoverf[i] += ((active ? 1 : 0) - hoverf[i]) * 0.2;
-							g2d.setPaint(new GradientPaint(
-								x, y + i * 45, new Color(
-									(int)(30 * hoverf[i]),
-									(int)(160 * hoverf[i]),
-									(int)(100 * hoverf[i]),
-									100),
-								x, y + i * 45 + 35, new Color(
-									(int)(60 * hoverf[i]),
-									(int)(200 * hoverf[i]),
-									(int)(90 * hoverf[i]),
-									(int)(100 + 50 * hoverf[i]))));
-							g2d.fillArc(x + w - 23, y + i * 45 + 11, 15, 15, 0, 360);
-							g2d.setColor(new Color(
-									35 + (int)(65 * hoverf[i]),
-									185 + (int)(45 * hoverf[i]),
-									185 - (int)(65 * hoverf[i]),
-									150 + (int)(50 * hoverf[i])));
-							g2d.drawArc(x + w - 25, y + i * 45 + 9, 18, 18, 0, 360);
-							g2d.setStroke(new BasicStroke(2));
-							if (active) {
-								g2d.drawLine(x + w - 13, y + i * 45 + 16, x + w - 18, y + i * 45 + 21);
-								g2d.drawLine(x + w - 18, y + i * 45 + 21, x + w - 20, y + i * 45 + 19);
-							}
-							g2d.setStroke(new BasicStroke(1));
-							if (hover) {
-								if (lastHover != i) {
-									onhover.fire(i);
-								}
-								lastHover = i;
-							}
+						}
 					}
 				}
 			}
+		} else {
+			hovered = false;
 		}
 	}
 	
 	public void paintDropdown(Graphics g) {
 		super.paintComponent(g);
-		Graphics2D g2d = (Graphics2D) g;
-		
-		Point point = MouseInfo.getPointerInfo().getLocation();
-		Point loc = getLocationOnScreen();
-		
-		if (visible) {
-			g2d.setStroke(new BasicStroke(1));
+		if (visible && isVisible()) {
+			Graphics2D g2d = (Graphics2D) g;
 			
-			g2d.setFont(font);
+			Point point = MouseInfo.getPointerInfo().getLocation();
+			Point loc = getLocationOnScreen();
 			
-			for (int i = 0; i < titles.length; i++) {
-				if (i < types.length && i < options.length && options[i].length > 2 && options[i][1] == "1") {
-					
-					for (int j = 2; j < options[i].length; j++) {
-						int ty = y + i * 45 + 37 + (j - 2) * 30;
-						boolean hover = point.x - loc.x >= x && point.x - loc.x <= x + w && point.y - loc.y >= ty &&
-								point.y - loc.y <= ty + 28;
-						hovered = hovered || hover;
-						g2d.setColor(new Color(0, 0, 0, 220));
-						g2d.fillRect(x, ty, w, 29);
-						g2d.setPaint(new GradientPaint(x, ty, new Color(25, 150, 150, hover ? 90 : 30),
-								x, ty + 30, new Color(35, 185, 185, hover ? 120 : 50)));
-						g2d.fillRect(x, ty, w, 28);
-						g2d.setColor(new Color(35, 185, 185, 90));
-						g2d.drawLine(x, ty, x + w, ty);
-						g2d.drawLine(x, ty + 28, x + w, ty + 28);
-						g2d.setColor(new Color(35, 185, 185));
-						g2d.drawString(options[i][j], x + 10, ty + 20);
+			if (visible) {
+				g2d.setStroke(new BasicStroke(1));
+				
+				g2d.setFont(font);
+				
+				for (int i = 0; i < titles.length; i++) {
+					if (i < types.length && i < options.length && options[i].length > 2 && options[i][1] == "1") {
+						
+						for (int j = 2; j < options[i].length; j++) {
+							int ty = y + i * 45 + 37 + (j - 2) * 30;
+							boolean hover = point.x - loc.x >= x && point.x - loc.x <= x + w && point.y - loc.y >= ty &&
+									point.y - loc.y <= ty + 28;
+							hovered = hovered || hover;
+							g2d.setColor(new Color(0, 0, 0, 220));
+							g2d.fillRect(x, ty, w, 29);
+							g2d.setPaint(new GradientPaint(x, ty, new Color(25, 150, 150, hover ? 90 : 30),
+									x, ty + 30, new Color(35, 185, 185, hover ? 120 : 50)));
+							g2d.fillRect(x, ty, w, 28);
+							g2d.setColor(new Color(35, 185, 185, 90));
+							g2d.drawLine(x, ty, x + w, ty);
+							g2d.drawLine(x, ty + 28, x + w, ty + 28);
+							g2d.setColor(new Color(35, 185, 185));
+							g2d.drawString(options[i][j], x + 10, ty + 20);
+						}
 					}
 				}
 			}
